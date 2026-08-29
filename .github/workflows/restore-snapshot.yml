@@ -26,6 +26,7 @@ jobs:
           test -n "$ROOT"
           cp -a "$ROOT"/. ./
           git restore --source=HEAD -- .github/workflows
+          git clean -fd -- .github/workflows
           rm -rf bootstrap
       - name: Commit restored snapshot
         shell: bash
