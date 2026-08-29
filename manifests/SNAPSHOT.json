@@ -227,11 +227,6 @@
       "sha256": "d7f91ad7a0de30697700aeaf1b7ea1b0f04409ba4d591e5fd3b79bf4f5eabeb0"
     },
     {
-      "path": "apk/archive/FaceBatch-0.4.0-source-scrubbed.zip",
-      "bytes": 74077,
-      "sha256": "c0b11d070943787ef1f7e0687f84a0ad76f18265901328890ccb090f99e5f405"
-    },
-    {
       "path": "apk/archive/README.md",
       "bytes": 610,
       "sha256": "dec983e9b837b2f7c4346c1d4fc10ac96fd3abb1514be16733a4d834287ea8ce"
@@ -412,46 +407,11 @@
       "sha256": "012af5228847b3515d7037cdbc4e10c174e29b754e62ce6bd5632fe7c9b9ff57"
     },
     {
-      "path": "web/tests/fixtures/donor.jpg",
-      "bytes": 2244,
-      "sha256": "54b8fff1280d9a4d2925b2a9f4516c20bf1c439f7016ae4aa08fd50ca5cd616a"
-    },
-    {
-      "path": "web/tests/fixtures/donor2.jpg",
-      "bytes": 2080,
-      "sha256": "695c5eafdfa3dad6b80bc309ddbc48c44ef18e3bdc85bc2835db0aa6b56110da"
-    },
-    {
-      "path": "web/tests/fixtures/target.jpg",
-      "bytes": 2990,
-      "sha256": "c13c29bca4eff9b361de859dc420917f480275773ccaae4be3bb9ce181d82ac1"
-    },
-    {
-      "path": "web/tests/fixtures/target2.jpg",
-      "bytes": 3586,
-      "sha256": "cc885e798bc9951ab154fde64e905fc55489c83ced06079b4efbbd06b2e5c1b7"
-    },
-    {
       "path": "web/tests/gateway-smoke.sh",
       "bytes": 2977,
       "sha256": "35513276d8f12780b46b38fc7cd1e1bbae8e8d82f07bb5d461d30917220a912a"
-    },
-    {
-      "path": "web/tests/screenshots/mobile-donors.png",
-      "bytes": 251201,
-      "sha256": "7000a99dcb9b844fe82ad9c703d1b2122efdd824f93ece94ef20012c01cdcc44"
-    },
-    {
-      "path": "web/tests/screenshots/multi-flow.png",
-      "bytes": 316462,
-      "sha256": "242353aa98a4409e18600a070772ff1e1e5d3001b3a70ff6cd3562bfee5b07b2"
-    },
-    {
-      "path": "web/tests/screenshots/screenshot.png",
-      "bytes": 143125,
-      "sha256": "c3acd6b2b808507b47d527b09c3ed40451d48d44a7e20c47ffbad291ea730e0d"
     }
   ],
-  "file_count": 89,
-  "total_bytes": 1512697
+  "file_count": 81,
+  "total_bytes": 716932
 }

@@ -88,10 +88,20 @@ for path in ROOT.rglob('*'):
     if secret_assignment.search(text):
         fail(f'Possible literal password assignment in {path.relative_to(ROOT)}')
 
+source_tree = ROOT / 'apk' / 'archive' / 'FaceBatch-0.4.0-source'
+required_source = [
+    source_tree / 'README.md',
+    source_tree / 'SIGNING.txt',
+    source_tree / 'app' / 'build.gradle',
+    source_tree / 'app' / 'src' / 'main' / 'AndroidManifest.xml',
+    source_tree / 'app' / 'src' / 'main' / 'java' / 'com' / 'jon' / 'facebatch' / 'MainActivity.java',
+]
+for required in required_source:
+    if not required.exists():
+        fail(f'Sanitized Android source path is missing: {required.relative_to(ROOT)}')
+
 scrubbed = ROOT / 'apk' / 'archive' / 'FaceBatch-0.4.0-source-scrubbed.zip'
-if not scrubbed.exists():
-    fail('Sanitized Android source ZIP is missing')
-else:
+if scrubbed.exists():
     try:
         with zipfile.ZipFile(scrubbed) as archive:
             bad = archive.testzip()
