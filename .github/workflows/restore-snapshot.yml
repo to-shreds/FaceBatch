@@ -1,0 +1,42 @@
+name: Restore FaceBatch snapshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'bootstrap/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Reconstruct snapshot archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat bootstrap/snapshot.b64.part-* | tr -d '\r\n' | base64 -d > /tmp/facebatch-snapshot.tar.xz
+          mkdir -p /tmp/facebatch-restore
+          tar -xJf /tmp/facebatch-snapshot.tar.xz -C /tmp/facebatch-restore
+          ROOT="$(find /tmp/facebatch-restore -mindepth 1 -maxdepth 1 -type d | head -1)"
+          test -n "$ROOT"
+          cp -a "$ROOT"/. ./
+          rm -rf bootstrap
+          rm -f .github/workflows/restore-snapshot.yml
+      - name: Commit restored snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'FaceBatch Snapshot Bot'
+          git config user.email 'jonathanjablon-stack@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No snapshot changes to commit.'
+          else
+            git commit -m 'Restore FaceBatch 2026-08-29 status snapshot'
+            git push origin HEAD:main
+          fi
