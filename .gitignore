@@ -1,0 +1,42 @@
+# Local operating-system and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Android outputs and local configuration
+**/.gradle/
+**/build/
+**/dist/
+**/local.properties
+*.apk
+!apk/current/*.apk
+!apk/archive/*.apk
+*.aab
+*.apks
+*.idsig
+
+# Signing material and credentials
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+*.env
+.env.*
+!.env.example
+
+# Test output and temporary files
+__pycache__/
+*.pyc
+playwright-report/
+test-results/
+.tmp/
+tmp/
+
+# Distribution files are created outside the repository root
+FaceBatch-snapshot-*.zip
+FaceBatch-snapshot-*.bundle

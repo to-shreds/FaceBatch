@@ -1,0 +1,15 @@
+FaceBatch signing compatibility
+
+The private keystore and all passwords are intentionally excluded from this source snapshot.
+Never commit the personal signing key or plaintext credentials to Git.
+
+Expected signing certificate SHA-256:
+999d07c46a3afe2bb1fa3e3b9039b6ea468dddf579c65684597725cfbe6f6f3a
+
+The build-local.sh script reads these environment variables:
+FACEBATCH_KEYSTORE
+FACEBATCH_STOREPASS
+FACEBATCH_KEYPASS      optional when the key password equals the store password
+FACEBATCH_KEY_ALIAS    optional, defaults to facebatch
+
+Always verify the finished APK certificate against the fingerprint above before installing it as an update.

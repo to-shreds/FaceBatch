@@ -1,0 +1,2 @@
+5651158224cec2d4df084bfca654139dc51b637d3003414eaf5fb9f191aa3eca  FaceBatch-0.4.0-source.zip (original external attachment, not included)
+c0b11d070943787ef1f7e0687f84a0ad76f18265901328890ccb090f99e5f405  FaceBatch-0.4.0-source-scrubbed.zip

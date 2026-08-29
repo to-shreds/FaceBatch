@@ -1,0 +1,14 @@
+{
+  "name": "facebatch-web-gateway",
+  "private": true,
+  "version": "1.0.0-snapshot-2026-08-29",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "mock": "FACEBATCH_MOCK=1 node server.mjs",
+    "check": "node --check server.mjs"
+  }
+}

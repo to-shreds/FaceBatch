@@ -1,0 +1,2338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#111827">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%232768d8%27/%3E%3Ccircle cx=%2732%27 cy=%2728%27 r=%2715%27 fill=%27white%27/%3E%3Ccircle cx=%2727%27 cy=%2726%27 r=%272%27 fill=%27%23172033%27/%3E%3Ccircle cx=%2737%27 cy=%2726%27 r=%272%27 fill=%27%23172033%27/%3E%3Cpath d=%27M24 34c4 5 12 5 16 0%27 fill=%27none%27 stroke=%27%23172033%27 stroke-width=%273%27 stroke-linecap=%27round%27/%3E%3Cpath d=%27M12 53h40%27 stroke=%27white%27 stroke-width=%275%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
+  <title>FaceBatch Web</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f6fb;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #dbe3ef;
+      --accent: #2768d8;
+      --accent-2: #164ca4;
+      --accent-soft: #e8f0ff;
+      --good: #147d52;
+      --good-soft: #e7f7ef;
+      --warn: #a45d00;
+      --warn-soft: #fff5dd;
+      --bad: #b42334;
+      --bad-soft: #fff0f2;
+      --shadow: 0 12px 34px rgba(17, 24, 39, .09);
+      --radius: 18px;
+      --small-radius: 12px;
+      --max: 1180px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg: #0d1320;
+        --surface: #151d2d;
+        --surface-2: #101827;
+        --ink: #ecf2ff;
+        --muted: #9cabbe;
+        --line: #2c3950;
+        --accent: #79a8ff;
+        --accent-2: #9cc0ff;
+        --accent-soft: #20385f;
+        --good: #65d4a3;
+        --good-soft: #153e31;
+        --warn: #ffca72;
+        --warn-soft: #493716;
+        --bad: #ff8c9a;
+        --bad-soft: #4c222a;
+        --shadow: 0 14px 42px rgba(0, 0, 0, .3);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    button, input, select, textarea { font: inherit; }
+    button { touch-action: manipulation; }
+    .app-shell { min-height: 100vh; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      min-height: 66px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+    }
+    .brand-block { min-width: 0; flex: 1; }
+    .brand {
+      margin: 0;
+      font-size: clamp(1.25rem, 3.7vw, 1.65rem);
+      letter-spacing: -.035em;
+    }
+    .subtitle { margin: 2px 0 0; color: var(--muted); font-size: .78rem; }
+    .gateway-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: .78rem;
+      white-space: nowrap;
+    }
+    .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+    .gateway-badge.good .status-dot { background: var(--good); box-shadow: 0 0 0 4px color-mix(in srgb, var(--good) 18%, transparent); }
+    .gateway-badge.bad .status-dot { background: var(--bad); }
+    .icon-button {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      min-width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .mode-tabs {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      padding: 0 16px 10px;
+    }
+    .mode-tab {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      min-height: 40px;
+      padding: 8px 7px;
+      border-radius: 11px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .mode-tab.active { color: var(--accent-2); background: var(--accent-soft); }
+    main { max-width: var(--max); margin: 0 auto; padding: 16px 16px 72px; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .hero-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 2px 0 14px;
+    }
+    .hero-row h2 { margin: 0; font-size: clamp(1.35rem, 4vw, 2rem); letter-spacing: -.035em; }
+    .hero-row p { margin: 5px 0 0; color: var(--muted); max-width: 760px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .card.compact { padding: 13px 14px; }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .step {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent-2);
+      font-weight: 850;
+      flex: none;
+    }
+    .card-title { min-width: 0; flex: 1; }
+    .card-title h3 { margin: 0; font-size: 1.03rem; }
+    .card-title p { margin: 2px 0 0; color: var(--muted); font-size: .83rem; }
+    .count-pill {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: .78rem;
+      font-weight: 750;
+    }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .button {
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: var(--ink);
+      border-radius: 12px;
+      min-height: 42px;
+      padding: 9px 13px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .button:hover { border-color: color-mix(in srgb, var(--accent) 48%, var(--line)); }
+    .button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .button.primary:hover { background: var(--accent-2); }
+    .button.danger { background: var(--bad-soft); color: var(--bad); border-color: color-mix(in srgb, var(--bad) 30%, var(--line)); }
+    .button.good { background: var(--good-soft); color: var(--good); border-color: color-mix(in srgb, var(--good) 30%, var(--line)); }
+    .button:disabled { opacity: .46; cursor: not-allowed; }
+    .button.small { min-height: 34px; padding: 6px 9px; font-size: .8rem; border-radius: 10px; }
+    .file-grid, .donor-grid, .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .file-card, .donor-card, .result-card {
+      position: relative;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      overflow: hidden;
+      background: var(--surface-2);
+    }
+    .file-thumb, .donor-thumb, .result-thumb {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: block;
+      object-fit: cover;
+      background: color-mix(in srgb, var(--surface-2) 75%, black);
+    }
+    .file-meta, .result-meta { padding: 8px; }
+    .filename { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 720; font-size: .78rem; }
+    .file-detail { color: var(--muted); font-size: .68rem; margin-top: 2px; }
+    .remove-chip {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 29px;
+      height: 29px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(12, 18, 29, .76);
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .donor-card { cursor: pointer; padding-bottom: 8px; }
+    .donor-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
+    .donor-label {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 24px;
+      margin: 7px auto 0;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-2);
+      font-weight: 900;
+      font-size: .82rem;
+    }
+    .empty-state {
+      border: 1px dashed var(--line);
+      border-radius: 13px;
+      color: var(--muted);
+      padding: 18px;
+      text-align: center;
+      margin-top: 10px;
+      font-size: .88rem;
+    }
+    .equation-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+    }
+    .equation { font-size: clamp(1.45rem, 5vw, 2.2rem); font-weight: 900; letter-spacing: -.04em; }
+    .equation-note { color: var(--muted); margin-top: 3px; font-size: .85rem; }
+    .progress-wrap { display: none; }
+    .progress-wrap.visible { display: block; }
+    .progress-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .progress-title { font-weight: 850; }
+    .progress-counts { color: var(--muted); font-size: .82rem; }
+    progress { width: 100%; height: 14px; margin: 10px 0 5px; accent-color: var(--accent); }
+    .progress-message { color: var(--muted); font-size: .84rem; min-height: 1.2em; }
+    .error-box, .warning-box, .info-box {
+      border-radius: 12px;
+      padding: 11px 12px;
+      margin-top: 10px;
+      font-size: .84rem;
+      white-space: pre-wrap;
+    }
+    .error-box { background: var(--bad-soft); color: var(--bad); border: 1px solid color-mix(in srgb, var(--bad) 25%, var(--line)); }
+    .warning-box { background: var(--warn-soft); color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 25%, var(--line)); }
+    .info-box { background: var(--accent-soft); color: var(--accent-2); border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--line)); }
+    .target-rows { display: grid; gap: 12px; }
+    .target-row {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      padding: 12px;
+      scroll-margin-top: 132px;
+    }
+    .target-row.active { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 17%, transparent); }
+    .target-row.failed { border-color: color-mix(in srgb, var(--bad) 65%, var(--line)); }
+    .row-head { display: flex; gap: 10px; align-items: center; }
+    .row-number { width: 30px; height: 30px; border-radius: 9px; background: var(--surface-2); display: grid; place-items: center; font-weight: 850; flex: none; }
+    .row-title { min-width: 0; flex: 1; }
+    .row-title strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row-subtitle { color: var(--muted); font-size: .75rem; margin-top: 2px; }
+    .status-pill { border-radius: 999px; padding: 5px 8px; font-size: .72rem; font-weight: 850; background: var(--surface-2); color: var(--muted); }
+    .status-pill.ready, .status-pill.done { background: var(--good-soft); color: var(--good); }
+    .status-pill.failed { background: var(--bad-soft); color: var(--bad); }
+    .status-pill.running, .status-pill.analyzing { background: var(--accent-soft); color: var(--accent-2); }
+    .row-body { display: grid; grid-template-columns: minmax(220px, .9fr) minmax(260px, 1.1fr); gap: 12px; margin-top: 12px; }
+    .target-preview {
+      position: relative;
+      overflow: hidden;
+      border-radius: 13px;
+      background: #070b12;
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+    }
+    .target-preview > img { width: 100%; height: 100%; max-height: 430px; object-fit: contain; display: block; }
+    .face-rect {
+      position: absolute;
+      border: 2px solid #63f2d0;
+      border-radius: 8px;
+      pointer-events: none;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.45);
+    }
+    .face-rect.active { border-color: #ffe477; border-width: 3px; }
+    .face-marker {
+      position: absolute;
+      min-width: 25px;
+      height: 23px;
+      padding: 0 6px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      background: #101827;
+      color: white;
+      font-weight: 900;
+      font-size: .72rem;
+      pointer-events: none;
+      border: 1px solid rgba(255,255,255,.7);
+    }
+    .face-panel { min-width: 0; }
+    .prompt {
+      border-radius: 11px;
+      background: var(--accent-soft);
+      color: var(--accent-2);
+      padding: 9px 10px;
+      font-weight: 800;
+      font-size: .83rem;
+      margin-bottom: 10px;
+    }
+    .face-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+    .face-card {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface-2);
+      padding: 7px;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .face-card.active { border-color: var(--accent); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent); }
+    .face-card.assigned { background: var(--good-soft); }
+    .face-crop { width: 100%; aspect-ratio: 1 / 1; display: block; object-fit: cover; border-radius: 8px; background: color-mix(in srgb, var(--surface-2) 70%, black); }
+    .face-name { text-align: center; margin-top: 5px; font-size: .73rem; font-weight: 850; }
+    .assignment-name { text-align: center; color: var(--muted); font-size: .64rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .field { display: grid; gap: 6px; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-size: .79rem; color: var(--muted); font-weight: 750; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: var(--ink);
+      border-radius: 11px;
+      padding: 10px 11px;
+      min-height: 42px;
+    }
+    .field textarea { min-height: 104px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .78rem; }
+    .check-row { display: flex; align-items: center; gap: 9px; min-height: 42px; }
+    .check-row input { width: 18px; height: 18px; accent-color: var(--accent); }
+    .settings-section { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; }
+    .settings-section:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+    .settings-section h3 { margin: 0 0 10px; font-size: 1rem; }
+    .log {
+      max-height: 220px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 9px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .72rem;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    .result-card { display: flex; flex-direction: column; }
+    .result-card .result-thumb { aspect-ratio: 4 / 3; }
+    .result-card .result-meta { flex: 1; }
+    .result-actions { display: flex; gap: 6px; padding: 0 8px 8px; }
+    .result-actions .button { flex: 1; }
+    .toast-stack { position: fixed; right: 14px; bottom: 14px; z-index: 100; display: grid; gap: 8px; width: min(360px, calc(100vw - 28px)); }
+    .toast { background: #111827; color: white; border-radius: 12px; padding: 11px 12px; box-shadow: 0 14px 36px rgba(0,0,0,.3); font-size: .84rem; animation: toast-in .18s ease-out; }
+    .toast.bad { background: #8f1d2c; }
+    @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } }
+    .hidden { display: none !important; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 780px) {
+      .gateway-badge span:last-child { display: none; }
+      .row-body { grid-template-columns: 1fr; }
+      .target-preview { min-height: 190px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .equation-card { grid-template-columns: 1fr; }
+      .equation-card .button { width: 100%; }
+    }
+    @media (max-width: 520px) {
+      .topbar-inner { padding-inline: 12px; }
+      .mode-tabs { padding-inline: 10px; }
+      .mode-tab { font-size: .77rem; }
+      main { padding: 12px 10px 64px; }
+      .card { padding: 13px; border-radius: 15px; }
+      .hero-row { align-items: flex-start; }
+      .file-grid, .donor-grid, .results-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+      .file-meta, .result-meta { padding: 6px; }
+      .filename { font-size: .69rem; }
+      .file-detail { display: none; }
+      .button-row .button { flex: 1 1 auto; }
+      .row-head { align-items: flex-start; }
+      .status-pill { margin-left: auto; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-block">
+        <h1 class="brand">FaceBatch</h1>
+        <p class="subtitle">Web snapshot 1.0 · Android feature parity workflow</p>
+      </div>
+      <button id="gatewayBadge" class="gateway-badge" type="button" title="Test gateway connection">
+        <span class="status-dot" aria-hidden="true"></span><span id="gatewayBadgeText">Gateway not checked</span>
+      </button>
+      <button id="topSettings" class="icon-button" type="button" aria-label="Open settings" title="Settings">⚙</button>
+    </div>
+    <nav class="mode-tabs" aria-label="FaceBatch sections">
+      <button class="mode-tab active" data-view="single" type="button">Single batch</button>
+      <button class="mode-tab" data-view="multi" type="button">Multi-face</button>
+      <button class="mode-tab" data-view="results" type="button">Results <span id="resultCountTab"></span></button>
+      <button class="mode-tab" data-view="settings" type="button">Settings</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="view-single" class="view active" aria-labelledby="singleHeading">
+      <div class="hero-row">
+        <div>
+          <h2 id="singleHeading">Cross-product face swap</h2>
+          <p>Every donor face is paired with every target image, just like the Android batch workflow.</p>
+        </div>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <div class="step">1</div>
+          <div class="card-title"><h3>Faces to insert</h3><p>Choose images or a whole folder.</p></div>
+          <span id="singleDonorCount" class="count-pill">0</span>
+        </div>
+        <div class="button-row">
+          <button id="pickSingleDonors" class="button" type="button">Choose images</button>
+          <button id="pickSingleDonorFolder" class="button" type="button">Choose folder</button>
+          <button id="clearSingleDonors" class="button danger" type="button">Clear</button>
+        </div>
+        <div id="singleDonorGrid" class="file-grid"></div>
+        <div id="singleDonorEmpty" class="empty-state">No donor faces loaded.</div>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <div class="step">2</div>
+          <div class="card-title"><h3>Photos to modify</h3><p>Each target will be combined with every donor.</p></div>
+          <span id="singleTargetCount" class="count-pill">0</span>
+        </div>
+        <div class="button-row">
+          <button id="pickSingleTargets" class="button" type="button">Choose images</button>
+          <button id="pickSingleTargetFolder" class="button" type="button">Choose folder</button>
+          <button id="clearSingleTargets" class="button danger" type="button">Clear</button>
+        </div>
+        <div id="singleTargetGrid" class="file-grid"></div>
+        <div id="singleTargetEmpty" class="empty-state">No target photos loaded.</div>
+      </article>
+
+      <article class="card compact equation-card">
+        <div>
+          <div id="singleEquation" class="equation">0 × 0 = 0</div>
+          <div id="singleEquationNote" class="equation-note">Select at least one donor and one target.</div>
+        </div>
+        <button id="startSingle" class="button primary" type="button" disabled>Start batch</button>
+      </article>
+
+      <article id="singleProgressWrap" class="card progress-wrap">
+        <div class="progress-top">
+          <div id="singleProgressTitle" class="progress-title">Batch in progress</div>
+          <div id="singleProgressCounts" class="progress-counts">0 / 0</div>
+        </div>
+        <progress id="singleProgress" value="0" max="1"></progress>
+        <div id="singleProgressMessage" class="progress-message"></div>
+        <div id="singleProgressError" class="error-box hidden"></div>
+        <div class="button-row" style="margin-top:10px">
+          <button id="cancelSingle" class="button danger" type="button">Cancel</button>
+          <button id="retrySingle" class="button hidden" type="button">Retry failed</button>
+          <button id="openSingleResults" class="button good hidden" type="button">View results</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="view-multi" class="view" aria-labelledby="multiHeading">
+      <div class="hero-row">
+        <div>
+          <h2 id="multiHeading">Multi-face batch</h2>
+          <p>Load shared donors, analyze one or more targets, then assign donors face by face and run up to 100 recipe rows.</p>
+        </div>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <div class="step">1</div>
+          <div class="card-title"><h3>Shared donor faces</h3><p>All loaded donors remain visible in a vertically expanding grid.</p></div>
+          <span id="multiDonorCount" class="count-pill">0</span>
+        </div>
+        <div class="button-row">
+          <button id="pickMultiDonors" class="button" type="button">Choose donors</button>
+          <button id="pickMultiDonorFolder" class="button" type="button">Choose folder</button>
+          <button id="clearMultiDonors" class="button danger" type="button">Clear</button>
+        </div>
+        <div id="multiDonorGrid" class="donor-grid"></div>
+        <div id="multiDonorEmpty" class="empty-state">Load at least one donor image.</div>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <div class="step">2</div>
+          <div class="card-title"><h3>Target recipes</h3><p>Each image is its own editable row. Duplicate a row to make another version of the same original.</p></div>
+          <span id="multiRowCount" class="count-pill">0 / 100</span>
+        </div>
+        <div class="button-row">
+          <button id="pickMultiTargets" class="button" type="button">Add target images</button>
+          <button id="pickMultiTargetFolder" class="button" type="button">Add target folder</button>
+          <button id="analyzeAllRows" class="button" type="button">Analyze unfinished</button>
+          <button id="clearMultiRows" class="button danger" type="button">Clear rows</button>
+        </div>
+        <div id="multiRows" class="target-rows" style="margin-top:12px"></div>
+        <div id="multiRowsEmpty" class="empty-state">No target rows loaded.</div>
+      </article>
+
+      <article class="card compact equation-card">
+        <div>
+          <div id="multiEquation" class="equation">0 ready rows</div>
+          <div id="multiEquationNote" class="equation-note">Analyze a target and assign at least one face.</div>
+        </div>
+        <button id="startMulti" class="button primary" type="button" disabled>Run multi-face batch</button>
+      </article>
+
+      <article id="multiProgressWrap" class="card progress-wrap">
+        <div class="progress-top">
+          <div id="multiProgressTitle" class="progress-title">Multi-face batch in progress</div>
+          <div id="multiProgressCounts" class="progress-counts">0 / 0</div>
+        </div>
+        <progress id="multiProgress" value="0" max="1"></progress>
+        <div id="multiProgressMessage" class="progress-message"></div>
+        <div id="multiProgressError" class="error-box hidden"></div>
+        <div class="button-row" style="margin-top:10px">
+          <button id="cancelMulti" class="button danger" type="button">Cancel</button>
+          <button id="retryMulti" class="button hidden" type="button">Retry failed rows</button>
+          <button id="openMultiResults" class="button good hidden" type="button">View results</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="view-results" class="view" aria-labelledby="resultsHeading">
+      <div class="hero-row">
+        <div>
+          <h2 id="resultsHeading">Results</h2>
+          <p>Results are converted to genuine JPEG files in your browser. Download them individually or as one ZIP.</p>
+        </div>
+      </div>
+      <article class="card">
+        <div class="button-row">
+          <button id="downloadAllResults" class="button primary" type="button" disabled>Download all as ZIP</button>
+          <button id="clearResults" class="button danger" type="button" disabled>Clear results</button>
+        </div>
+        <div id="resultsGrid" class="results-grid"></div>
+        <div id="resultsEmpty" class="empty-state">No generated results yet.</div>
+      </article>
+    </section>
+
+    <section id="view-settings" class="view" aria-labelledby="settingsHeading">
+      <div class="hero-row">
+        <div>
+          <h2 id="settingsHeading">Settings</h2>
+          <p>The public page contains no provider signing secrets. Network requests go through your private FaceBatch gateway.</p>
+        </div>
+      </div>
+      <article class="card">
+        <div class="settings-section">
+          <h3>Gateway connection</h3>
+          <div class="form-grid">
+            <div class="field full">
+              <label for="settingGatewayUrl">Gateway URL</label>
+              <input id="settingGatewayUrl" type="url" inputmode="url" placeholder="https://your-private-gateway.example.com">
+            </div>
+            <div class="field">
+              <label for="settingGatewayToken">Access token</label>
+              <input id="settingGatewayToken" type="password" autocomplete="off" placeholder="Stored only on this device when requested">
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <div class="check-row"><input id="settingRememberToken" type="checkbox"><label for="settingRememberToken">Remember token on this device</label></div>
+            </div>
+          </div>
+          <div class="button-row" style="margin-top:10px">
+            <button id="testGateway" class="button" type="button">Test connection</button>
+          </div>
+          <div class="warning-box">GitHub Pages is static hosting. It cannot safely keep provider secrets or bypass browser cross-origin restrictions. The included private gateway preserves the Android request profiles while keeping those details off the public page.</div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Batch behavior</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label for="settingEngine">Single-face engine</label>
+              <select id="settingEngine">
+                <option value="aifaceswap_hq">AIFaceSwap / High Quality</option>
+                <option value="faceover_auto">Face Over Auto</option>
+                <option value="fjoy">FJoy / Magicut</option>
+                <option value="tao">TaoAnhDep direct</option>
+                <option value="custom">Custom API</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="settingConcurrency">Concurrent single swaps</label>
+              <input id="settingConcurrency" type="number" min="1" max="6" step="1">
+            </div>
+            <div class="field">
+              <label for="settingRetries">Retries per failed request</label>
+              <input id="settingRetries" type="number" min="0" max="5" step="1">
+            </div>
+            <div class="field">
+              <label for="settingJpegQuality">JPEG quality</label>
+              <input id="settingJpegQuality" type="number" min="0.5" max="1" step="0.01">
+            </div>
+            <div class="field">
+              <label for="settingOutputPrefix">Output filename prefix</label>
+              <input id="settingOutputPrefix" type="text" maxlength="40">
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <div class="check-row"><input id="settingEnhancer" type="checkbox"><label for="settingEnhancer">Enable provider enhancer when available</label></div>
+            </div>
+            <div class="field full">
+              <div class="check-row"><input type="checkbox" checked disabled><label>Built-in provider safety checks remain enabled. Custom APIs follow their own controls.</label></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="customSettings" class="settings-section hidden">
+          <h3>Custom API profile</h3>
+          <p class="muted">These controls preserve the Android custom endpoint, multipart mapping, authentication, response parsing, and polling workflow.</p>
+          <div class="button-row" style="margin:10px 0 12px">
+            <button id="loadDeveloperPreset" class="button small" type="button">Load external developer API preset</button>
+          </div>
+          <div class="form-grid">
+            <div class="field full"><label for="customEndpoint">HTTPS endpoint</label><input id="customEndpoint" type="url"></div>
+            <div class="field"><label for="customSourceField">Donor field</label><input id="customSourceField" type="text"></div>
+            <div class="field"><label for="customTargetField">Target field</label><input id="customTargetField" type="text"></div>
+            <div class="field full"><div class="check-row"><input id="customSwapMappings" type="checkbox"><label for="customSwapMappings">Reverse the two file-field assignments</label></div></div>
+            <div class="field"><label for="customEnhancerField">Enhancer field</label><input id="customEnhancerField" type="text"></div>
+            <div class="field"><label for="customSafetyField">Safety-check field</label><input id="customSafetyField" type="text"></div>
+            <div class="field"><label for="customResponseMode">Response mode</label><select id="customResponseMode"><option value="auto">Automatic with fallback paths</option><option value="json">Configured JSON path</option><option value="polling">Polling</option></select></div>
+            <div class="field"><label for="customResultPath">Result JSON path</label><input id="customResultPath" type="text"></div>
+            <div class="field"><label for="customPollUrlPath">Polling URL path</label><input id="customPollUrlPath" type="text"></div>
+            <div class="field"><label for="customPollStatusPath">Polling status path</label><input id="customPollStatusPath" type="text"></div>
+            <div class="field"><label for="customPollIdPath">Polling job ID path</label><input id="customPollIdPath" type="text"></div>
+            <div class="field"><label for="customPollUrlTemplate">Polling URL template</label><input id="customPollUrlTemplate" type="url" placeholder="https://example.test/jobs/{id}"></div>
+            <div class="field"><label for="customPollSuccessValue">Success value</label><input id="customPollSuccessValue" type="text"></div>
+            <div class="field"><label for="customPollFailureValues">Failure values</label><input id="customPollFailureValues" type="text" placeholder="failed,error,cancelled"></div>
+            <div class="field"><label for="customPollInterval">Seconds between checks</label><input id="customPollInterval" type="number" min="1" max="60" step="1"></div>
+            <div class="field"><label for="customMaxPolls">Maximum checks</label><input id="customMaxPolls" type="number" min="1" max="1000" step="1"></div>
+            <div class="field"><label for="customOrigin">Origin header</label><input id="customOrigin" type="url"></div>
+            <div class="field"><label for="customUserAgent">User-Agent</label><input id="customUserAgent" type="text"></div>
+            <div class="field"><label for="customAuthHeaderName">Authentication header name</label><input id="customAuthHeaderName" type="text"></div>
+            <div class="field"><label for="customAuthHeaderValue">Authentication header value</label><input id="customAuthHeaderValue" type="password" autocomplete="off"></div>
+            <div class="field full"><label for="customExtraFields">Extra form fields as JSON</label><textarea id="customExtraFields" spellcheck="false" placeholder='{"swap_all":"true"}'></textarea></div>
+            <div class="field full"><label for="customExtraHeaders">Extra headers as JSON</label><textarea id="customExtraHeaders" spellcheck="false" placeholder='{"X-Client":"FaceBatch"}'></textarea></div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Session and diagnostics</h3>
+          <div class="button-row">
+            <button id="saveSettings" class="button primary" type="button">Save settings</button>
+            <button id="newSession" class="button danger" type="button">Start fresh session</button>
+            <button id="exportDiagnostics" class="button" type="button">Export diagnostics</button>
+          </div>
+          <div id="diagnosticLog" class="log" style="margin-top:10px">FaceBatch Web ready.</div>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
+
+<input id="inputSingleDonors" class="sr-only" type="file" accept="image/*" multiple>
+<input id="inputSingleDonorFolder" class="sr-only" type="file" accept="image/*" multiple webkitdirectory directory>
+<input id="inputSingleTargets" class="sr-only" type="file" accept="image/*" multiple>
+<input id="inputSingleTargetFolder" class="sr-only" type="file" accept="image/*" multiple webkitdirectory directory>
+<input id="inputMultiDonors" class="sr-only" type="file" accept="image/*" multiple>
+<input id="inputMultiDonorFolder" class="sr-only" type="file" accept="image/*" multiple webkitdirectory directory>
+<input id="inputMultiTargets" class="sr-only" type="file" accept="image/*" multiple>
+<input id="inputMultiTargetFolder" class="sr-only" type="file" accept="image/*" multiple webkitdirectory directory>
+<div id="toastStack" class="toast-stack" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const VERSION = '1.0.0-snapshot-2026-08-29';
+  const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36';
+  const MAX_SINGLE_FILES = 1000;
+  const MAX_MULTI_DONORS = 20;
+  const MAX_MULTI_ROWS = 100;
+  const STALE_ANALYSIS_MS = 20 * 60 * 1000;
+  const DB_NAME = 'FaceBatchWeb';
+  const DB_VERSION = 1;
+  const DB_FILES = 'files';
+  const DB_STATE = 'state';
+  const $ = (id) => document.getElementById(id);
+  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+  const defaultSettings = Object.freeze({
+    gatewayUrl: '',
+    engine: 'aifaceswap_hq',
+    concurrency: 1,
+    retries: 1,
+    jpegQuality: 0.95,
+    outputPrefix: 'FaceBatch',
+    enhancerEnabled: true,
+    rememberToken: false,
+    custom: {
+      endpoint: 'https://api.taoanhdep.com/doi-mat',
+      sourceField: 'source',
+      targetField: 'target',
+      swapMappings: false,
+      enhancerField: 'enhancer',
+      safetyField: 'check-nsfw',
+      resultPath: 'result.image',
+      responseMode: 'auto',
+      pollUrlPath: 'polling_url',
+      pollStatusPath: 'status',
+      pollIdPath: 'id',
+      pollUrlTemplate: '',
+      pollSuccessValue: 'success',
+      pollFailureValues: 'failed,error,cancelled',
+      pollIntervalSeconds: 3,
+      maxPolls: 100,
+      origin: 'https://taoanhdep.com',
+      userAgent: DEFAULT_USER_AGENT,
+      authHeaderName: '',
+      authHeaderValue: '',
+      extraFormFields: {},
+      extraHeaders: {},
+    },
+  });
+
+  const state = {
+    activeView: 'single',
+    settings: structuredClone(defaultSettings),
+    single: {
+      donors: [],
+      targets: [],
+      running: false,
+      cancelled: false,
+      controller: null,
+      jobs: [],
+      failedJobs: [],
+      completed: 0,
+      failed: 0,
+      lastError: '',
+    },
+    multi: {
+      donors: [],
+      rows: [],
+      activeRowId: null,
+      activeFaceIndex: null,
+      selectedDonorId: null,
+      running: false,
+      cancelled: false,
+      controller: null,
+      completed: 0,
+      failed: 0,
+      lastError: '',
+    },
+    results: [],
+    logs: [],
+    db: null,
+    saveTimer: null,
+    restoring: false,
+  };
+
+  function log(message, data) {
+    const line = `[${new Date().toLocaleTimeString()}] ${message}${data === undefined ? '' : ` ${typeof data === 'string' ? data : JSON.stringify(data)}`}`;
+    state.logs.push(line);
+    if (state.logs.length > 250) state.logs.splice(0, state.logs.length - 250);
+    $('diagnosticLog').textContent = state.logs.join('\n');
+    $('diagnosticLog').scrollTop = $('diagnosticLog').scrollHeight;
+    console.log(line);
+  }
+
+  function toast(message, bad = false) {
+    const node = document.createElement('div');
+    node.className = `toast${bad ? ' bad' : ''}`;
+    node.textContent = message;
+    $('toastStack').append(node);
+    setTimeout(() => node.remove(), 3800);
+  }
+
+  function cleanName(value, fallback = 'image') {
+    const base = String(value || fallback).split(/[\\/]/).pop().replace(/\.[^.]+$/, '');
+    const clean = base.replace(/[^A-Za-z0-9._ -]+/g, '_').trim().replace(/\s+/g, '_');
+    return (clean || fallback).slice(0, 48);
+  }
+
+  function letterFor(index) {
+    let value = Number(index) + 1;
+    let output = '';
+    while (value > 0) {
+      value -= 1;
+      output = String.fromCharCode(65 + (value % 26)) + output;
+      value = Math.floor(value / 26);
+    }
+    return output;
+  }
+
+  function formatBytes(bytes) {
+    if (!Number.isFinite(bytes) || bytes < 0) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function makeId(prefix = 'item') {
+    return `${prefix}_${crypto.randomUUID()}`;
+  }
+
+  function revokeItem(item) {
+    if (item?.url) URL.revokeObjectURL(item.url);
+    if (item?.cropUrls) Object.values(item.cropUrls).forEach((url) => URL.revokeObjectURL(url));
+    if (item?.jpegUrl) URL.revokeObjectURL(item.jpegUrl);
+  }
+
+  async function readImageDimensions(blob) {
+    const bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+    const dimensions = { width: bitmap.width, height: bitmap.height };
+    bitmap.close();
+    return dimensions;
+  }
+
+  async function createFileItem(file, existingId = null) {
+    const dimensions = await readImageDimensions(file);
+    return {
+      id: existingId || makeId('img'),
+      name: file.name || 'image',
+      type: file.type || 'image/jpeg',
+      size: file.size,
+      lastModified: file.lastModified || Date.now(),
+      file,
+      url: URL.createObjectURL(file),
+      width: dimensions.width,
+      height: dimensions.height,
+      jpegBlob: null,
+    };
+  }
+
+  async function normalizeImage(blob, quality = state.settings.jpegQuality) {
+    const bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext('2d', { alpha: false });
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    return new Promise((resolve, reject) => canvas.toBlob(
+      (output) => output ? resolve(output) : reject(new Error('The browser could not create a JPEG image.')),
+      'image/jpeg',
+      quality,
+    ));
+  }
+
+  async function normalizedFile(item) {
+    if (!item.jpegBlob) item.jpegBlob = await normalizeImage(item.file, 0.95);
+    return new File([item.jpegBlob], `${cleanName(item.name)}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+  }
+
+  async function resultAsJpeg(blob) {
+    if (blob.type === 'image/jpeg') return blob;
+    return normalizeImage(blob, state.settings.jpegQuality);
+  }
+
+  async function openDb() {
+    if (!('indexedDB' in window)) return null;
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(DB_FILES)) db.createObjectStore(DB_FILES, { keyPath: 'id' });
+        if (!db.objectStoreNames.contains(DB_STATE)) db.createObjectStore(DB_STATE, { keyPath: 'key' });
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function dbRequest(storeName, mode, operation) {
+    if (!state.db) return Promise.resolve(undefined);
+    return new Promise((resolve, reject) => {
+      const transaction = state.db.transaction(storeName, mode);
+      const store = transaction.objectStore(storeName);
+      let request;
+      try { request = operation(store); } catch (error) { reject(error); return; }
+      if (request) {
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      } else {
+        transaction.oncomplete = () => resolve(undefined);
+      }
+      transaction.onerror = () => reject(transaction.error);
+    });
+  }
+
+  async function persistFile(item) {
+    if (!state.db) return;
+    await dbRequest(DB_FILES, 'readwrite', (store) => store.put({
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      size: item.size,
+      lastModified: item.lastModified,
+      width: item.width,
+      height: item.height,
+      blob: item.file,
+    }));
+  }
+
+  async function loadPersistedFile(id) {
+    const record = await dbRequest(DB_FILES, 'readonly', (store) => store.get(id));
+    if (!record?.blob) return null;
+    const file = new File([record.blob], record.name, { type: record.type, lastModified: record.lastModified });
+    const item = await createFileItem(file, record.id);
+    item.width = record.width || item.width;
+    item.height = record.height || item.height;
+    return item;
+  }
+
+  function serializableState() {
+    return {
+      version: VERSION,
+      savedAt: Date.now(),
+      single: {
+        donorIds: state.single.donors.map((item) => item.id),
+        targetIds: state.single.targets.map((item) => item.id),
+      },
+      multi: {
+        donorIds: state.multi.donors.map((item) => item.id),
+        rows: state.multi.rows.map((row) => ({
+          id: row.id,
+          targetId: row.target.id,
+          faces: row.faces,
+          assignments: row.assignments,
+          analyzedAt: row.analyzedAt,
+          status: row.status === 'running' ? 'ready' : row.status,
+          error: row.error || '',
+        })),
+        activeRowId: state.multi.activeRowId,
+        activeFaceIndex: state.multi.activeFaceIndex,
+        selectedDonorId: state.multi.selectedDonorId,
+      },
+    };
+  }
+
+  async function persistState() {
+    if (!state.db || state.restoring) return;
+    await dbRequest(DB_STATE, 'readwrite', (store) => store.put({ key: 'draft', value: serializableState() }));
+  }
+
+  function schedulePersist() {
+    clearTimeout(state.saveTimer);
+    state.saveTimer = setTimeout(() => persistState().catch((error) => log('Draft save failed:', error.message)), 500);
+  }
+
+  async function restoreDraft() {
+    if (!state.db) return;
+    const record = await dbRequest(DB_STATE, 'readonly', (store) => store.get('draft'));
+    const draft = record?.value;
+    if (!draft) return;
+    state.restoring = true;
+    try {
+      const cache = new Map();
+      const getItem = async (id) => {
+        if (!cache.has(id)) cache.set(id, await loadPersistedFile(id));
+        return cache.get(id);
+      };
+      for (const id of draft.single?.donorIds || []) {
+        const item = await getItem(id); if (item) state.single.donors.push(item);
+      }
+      for (const id of draft.single?.targetIds || []) {
+        const item = await getItem(id); if (item) state.single.targets.push(item);
+      }
+      for (const id of draft.multi?.donorIds || []) {
+        const item = await getItem(id); if (item) state.multi.donors.push(item);
+      }
+      for (const savedRow of draft.multi?.rows || []) {
+        const target = await getItem(savedRow.targetId);
+        if (!target) continue;
+        state.multi.rows.push({
+          id: savedRow.id || makeId('row'),
+          target,
+          faces: Array.isArray(savedRow.faces) ? savedRow.faces : [],
+          assignments: savedRow.assignments && typeof savedRow.assignments === 'object' ? savedRow.assignments : {},
+          analyzedAt: Number(savedRow.analyzedAt || 0),
+          status: savedRow.status || (savedRow.faces?.length ? 'ready' : 'new'),
+          error: savedRow.error || '',
+          resultId: null,
+          cropUrls: {},
+        });
+      }
+      state.multi.activeRowId = draft.multi?.activeRowId || state.multi.rows[0]?.id || null;
+      state.multi.activeFaceIndex = draft.multi?.activeFaceIndex ?? null;
+      state.multi.selectedDonorId = draft.multi?.selectedDonorId || null;
+      if (state.single.donors.length || state.single.targets.length || state.multi.rows.length) log('Restored the saved browser session.');
+    } finally {
+      state.restoring = false;
+    }
+  }
+
+  async function clearDatabase() {
+    if (!state.db) return;
+    await Promise.all([
+      dbRequest(DB_FILES, 'readwrite', (store) => store.clear()),
+      dbRequest(DB_STATE, 'readwrite', (store) => store.clear()),
+    ]);
+  }
+
+  function loadSettings() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('facebatch-settings') || '{}'); } catch { saved = {}; }
+    state.settings = {
+      ...structuredClone(defaultSettings),
+      ...saved,
+      custom: { ...structuredClone(defaultSettings.custom), ...(saved.custom || {}) },
+    };
+    const remembered = localStorage.getItem('facebatch-gateway-token') || '';
+    const session = sessionStorage.getItem('facebatch-gateway-token') || '';
+    $('settingGatewayToken').value = remembered || session;
+    state.settings.rememberToken = Boolean(remembered);
+  }
+
+  function saveSettingsFromForm(showToast = true) {
+    const customExtraFields = parseJsonField($('customExtraFields').value, 'extra form fields');
+    const customExtraHeaders = parseJsonField($('customExtraHeaders').value, 'extra headers');
+    state.settings = {
+      gatewayUrl: $('settingGatewayUrl').value.trim().replace(/\/+$/, ''),
+      engine: $('settingEngine').value,
+      concurrency: clampInt($('settingConcurrency').value, 1, 6, 1),
+      retries: clampInt($('settingRetries').value, 0, 5, 1),
+      jpegQuality: Math.min(1, Math.max(.5, Number($('settingJpegQuality').value || .95))),
+      outputPrefix: cleanName($('settingOutputPrefix').value || 'FaceBatch', 'FaceBatch'),
+      enhancerEnabled: $('settingEnhancer').checked,
+      rememberToken: $('settingRememberToken').checked,
+      custom: {
+        endpoint: $('customEndpoint').value.trim(),
+        sourceField: $('customSourceField').value.trim() || 'source',
+        targetField: $('customTargetField').value.trim() || 'target',
+        swapMappings: $('customSwapMappings').checked,
+        enhancerField: $('customEnhancerField').value.trim(),
+        safetyField: $('customSafetyField').value.trim(),
+        resultPath: $('customResultPath').value.trim() || 'result.image',
+        responseMode: $('customResponseMode').value,
+        pollUrlPath: $('customPollUrlPath').value.trim() || 'polling_url',
+        pollStatusPath: $('customPollStatusPath').value.trim() || 'status',
+        pollIdPath: $('customPollIdPath').value.trim() || 'id',
+        pollUrlTemplate: $('customPollUrlTemplate').value.trim(),
+        pollSuccessValue: $('customPollSuccessValue').value.trim() || 'success',
+        pollFailureValues: $('customPollFailureValues').value.trim() || 'failed,error,cancelled',
+        pollIntervalSeconds: clampInt($('customPollInterval').value, 1, 60, 3),
+        maxPolls: clampInt($('customMaxPolls').value, 1, 1000, 100),
+        origin: $('customOrigin').value.trim(),
+        userAgent: $('customUserAgent').value.trim() || DEFAULT_USER_AGENT,
+        authHeaderName: $('customAuthHeaderName').value.trim(),
+        authHeaderValue: $('customAuthHeaderValue').value,
+        extraFormFields: customExtraFields,
+        extraHeaders: customExtraHeaders,
+      },
+    };
+    if (state.settings.engine === 'custom') {
+      if (!state.settings.custom.endpoint.startsWith('https://')) throw new Error('The custom endpoint must begin with https://.');
+      if (!state.settings.custom.sourceField || !state.settings.custom.targetField) throw new Error('Both custom image field names are required.');
+      if (!state.settings.custom.resultPath) throw new Error('The custom result image path is required.');
+    }
+    localStorage.setItem('facebatch-settings', JSON.stringify(state.settings));
+    const token = $('settingGatewayToken').value;
+    sessionStorage.setItem('facebatch-gateway-token', token);
+    if (state.settings.rememberToken) localStorage.setItem('facebatch-gateway-token', token);
+    else localStorage.removeItem('facebatch-gateway-token');
+    updateCustomSettingsVisibility();
+    if (showToast) toast('Settings saved.');
+    log('Settings saved.');
+    renderAll();
+    return state.settings;
+  }
+
+  function populateSettingsForm() {
+    const settings = state.settings;
+    $('settingGatewayUrl').value = settings.gatewayUrl || '';
+    $('settingEngine').value = settings.engine || 'aifaceswap_hq';
+    $('settingConcurrency').value = settings.concurrency;
+    $('settingRetries').value = settings.retries;
+    $('settingJpegQuality').value = settings.jpegQuality;
+    $('settingOutputPrefix').value = settings.outputPrefix;
+    $('settingEnhancer').checked = settings.enhancerEnabled;
+    $('settingRememberToken').checked = settings.rememberToken;
+    $('customEndpoint').value = settings.custom.endpoint;
+    $('customSourceField').value = settings.custom.sourceField;
+    $('customTargetField').value = settings.custom.targetField;
+    $('customSwapMappings').checked = Boolean(settings.custom.swapMappings);
+    $('customEnhancerField').value = settings.custom.enhancerField || '';
+    $('customSafetyField').value = settings.custom.safetyField || '';
+    $('customResultPath').value = settings.custom.resultPath;
+    $('customResponseMode').value = settings.custom.responseMode;
+    $('customPollUrlPath').value = settings.custom.pollUrlPath || 'polling_url';
+    $('customPollStatusPath').value = settings.custom.pollStatusPath || 'status';
+    $('customPollIdPath').value = settings.custom.pollIdPath || 'id';
+    $('customPollUrlTemplate').value = settings.custom.pollUrlTemplate || '';
+    $('customPollSuccessValue').value = settings.custom.pollSuccessValue || 'success';
+    $('customPollFailureValues').value = settings.custom.pollFailureValues || 'failed,error,cancelled';
+    $('customPollInterval').value = settings.custom.pollIntervalSeconds || 3;
+    $('customMaxPolls').value = settings.custom.maxPolls || 100;
+    $('customOrigin').value = settings.custom.origin || '';
+    $('customUserAgent').value = settings.custom.userAgent || DEFAULT_USER_AGENT;
+    $('customAuthHeaderName').value = settings.custom.authHeaderName || '';
+    $('customAuthHeaderValue').value = settings.custom.authHeaderValue || '';
+    $('customExtraFields').value = JSON.stringify(settings.custom.extraFormFields || {}, null, 2);
+    $('customExtraHeaders').value = JSON.stringify(settings.custom.extraHeaders || {}, null, 2);
+    updateCustomSettingsVisibility();
+  }
+
+  function updateCustomSettingsVisibility() {
+    $('customSettings').classList.toggle('hidden', $('settingEngine').value !== 'custom');
+  }
+
+  function loadDeveloperApiPreset() {
+    $('settingEngine').value = 'custom';
+    $('customEndpoint').value = 'https://tiemanhai.com/api/v1-thay-doi-khuon-mat.php';
+    $('customSourceField').value = 'face';
+    $('customTargetField').value = 'image';
+    $('customSwapMappings').checked = false;
+    $('customEnhancerField').value = 'enhancer';
+    $('customSafetyField').value = '';
+    $('customResponseMode').value = 'polling';
+    $('customResultPath').value = 'output_url';
+    $('customPollUrlPath').value = 'poll_url';
+    $('customPollStatusPath').value = 'status';
+    $('customPollIdPath').value = 'id';
+    $('customPollUrlTemplate').value = 'https://tiemanhai.com/api/v1-jobs-get.php?id={id}';
+    $('customPollSuccessValue').value = 'success';
+    $('customPollFailureValues').value = 'failed,error,cancelled,timeout,refunded';
+    $('customPollInterval').value = '2';
+    $('customMaxPolls').value = '180';
+    $('customOrigin').value = '';
+    $('customUserAgent').value = DEFAULT_USER_AGENT;
+    $('customAuthHeaderName').value = 'Authorization';
+    $('customAuthHeaderValue').value = '';
+    $('customExtraFields').value = JSON.stringify({ swap_all: 'true', target_index: '0', ai_label: 'false', output_format: 'jpg' }, null, 2);
+    $('customExtraHeaders').value = '{}';
+    updateCustomSettingsVisibility();
+    toast('External developer API preset loaded. Enter its API key as the authentication value.');
+  }
+
+  function parseJsonField(text, label) {
+    if (!text.trim()) return {};
+    let value;
+    try { value = JSON.parse(text); } catch (error) { throw new Error(`Invalid JSON in ${label}: ${error.message}`); }
+    if (!value || Array.isArray(value) || typeof value !== 'object') throw new Error(`${label} must be a JSON object.`);
+    return value;
+  }
+
+  function clampInt(value, min, max, fallback) {
+    const number = Number.parseInt(value, 10);
+    return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
+  }
+
+  function gatewayToken() {
+    return $('settingGatewayToken').value || sessionStorage.getItem('facebatch-gateway-token') || localStorage.getItem('facebatch-gateway-token') || '';
+  }
+
+  function gatewayUrl() {
+    return ($('settingGatewayUrl').value.trim() || state.settings.gatewayUrl || '').replace(/\/+$/, '');
+  }
+
+  async function gatewayFetch(path, options = {}) {
+    const base = gatewayUrl();
+    if (!base) throw new Error('Set the private gateway URL in Settings first.');
+    const headers = new Headers(options.headers || {});
+    const token = gatewayToken();
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    const response = await fetch(`${base}${path}`, { ...options, headers });
+    if (!response.ok) {
+      let detail = '';
+      try { detail = (await response.json()).error || ''; } catch { detail = await response.text().catch(() => ''); }
+      const error = new Error(detail || `Gateway returned HTTP ${response.status}.`);
+      error.status = response.status;
+      throw error;
+    }
+    return response;
+  }
+
+  async function testGateway() {
+    const badge = $('gatewayBadge');
+    $('gatewayBadgeText').textContent = 'Checking…';
+    badge.classList.remove('good', 'bad');
+    try {
+      const response = await gatewayFetch('/v1/health');
+      const health = await response.json();
+      badge.classList.add('good');
+      $('gatewayBadgeText').textContent = health.mock ? 'Gateway ready · mock mode' : 'Gateway ready';
+      log('Gateway connection passed.', health);
+      toast('Gateway connection passed.');
+      return health;
+    } catch (error) {
+      badge.classList.add('bad');
+      $('gatewayBadgeText').textContent = 'Gateway unavailable';
+      log('Gateway test failed:', error.message);
+      toast(error.message, true);
+      throw error;
+    }
+  }
+
+  async function beginGatewaySession(kind) {
+    const batchId = `${kind}_${crypto.randomUUID()}`;
+    await gatewayFetch('/v1/session/start', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ batchId, engine: state.settings.engine }),
+    });
+    return batchId;
+  }
+
+  async function endGatewaySession() {
+    try { await gatewayFetch('/v1/session/end', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' }); }
+    catch (error) { log('Gateway session cleanup warning:', error.message); }
+  }
+
+  async function addFiles(files, destination, max, kind) {
+    const imageFiles = [...files].filter((file) => file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name));
+    if (!imageFiles.length) { toast('No supported image files were selected.', true); return []; }
+    const existingKeys = new Set(destination.map((item) => `${item.name}|${item.size}|${item.lastModified}`));
+    const added = [];
+    for (const file of imageFiles) {
+      if (destination.length >= max) break;
+      const key = `${file.name}|${file.size}|${file.lastModified}`;
+      if (existingKeys.has(key)) continue;
+      try {
+        const item = await createFileItem(file);
+        destination.push(item);
+        existingKeys.add(key);
+        added.push(item);
+        await persistFile(item);
+      } catch (error) {
+        log(`Could not load ${file.name}:`, error.message);
+        toast(`Could not load ${file.name}.`, true);
+      }
+    }
+    if (imageFiles.length > added.length && destination.length >= max) toast(`${kind} limit reached: ${max}.`, true);
+    schedulePersist();
+    renderAll();
+    return added;
+  }
+
+  function fileCard(item, removeHandler) {
+    const card = document.createElement('div');
+    card.className = 'file-card';
+    const image = document.createElement('img');
+    image.className = 'file-thumb';
+    image.src = item.url;
+    image.alt = item.name;
+    card.append(image);
+    const meta = document.createElement('div');
+    meta.className = 'file-meta';
+    const name = document.createElement('div');
+    name.className = 'filename';
+    name.title = item.name;
+    name.textContent = item.name;
+    const detail = document.createElement('div');
+    detail.className = 'file-detail';
+    detail.textContent = `${item.width}×${item.height} · ${formatBytes(item.size)}`;
+    meta.append(name, detail);
+    card.append(meta);
+    const remove = document.createElement('button');
+    remove.className = 'remove-chip';
+    remove.type = 'button';
+    remove.textContent = '×';
+    remove.setAttribute('aria-label', `Remove ${item.name}`);
+    remove.addEventListener('click', (event) => { event.stopPropagation(); removeHandler(); });
+    card.append(remove);
+    return card;
+  }
+
+  function removeItem(collection, id) {
+    const index = collection.findIndex((item) => item.id === id);
+    if (index < 0) return;
+    const [removed] = collection.splice(index, 1);
+    if (!fileReferencedElsewhere(removed.id)) revokeItem(removed);
+    schedulePersist();
+    renderAll();
+  }
+
+  function fileReferencedElsewhere(id) {
+    const collections = [state.single.donors, state.single.targets, state.multi.donors, state.multi.rows.map((row) => row.target)];
+    return collections.some((collection) => collection.some((item) => item.id === id));
+  }
+
+  function renderFileGrid(container, empty, items, removeHandler) {
+    container.replaceChildren();
+    items.forEach((item) => container.append(fileCard(item, () => removeHandler(item))));
+    empty.classList.toggle('hidden', items.length > 0);
+  }
+
+  function renderSingle() {
+    $('singleDonorCount').textContent = state.single.donors.length;
+    $('singleTargetCount').textContent = state.single.targets.length;
+    renderFileGrid($('singleDonorGrid'), $('singleDonorEmpty'), state.single.donors, (item) => removeItem(state.single.donors, item.id));
+    renderFileGrid($('singleTargetGrid'), $('singleTargetEmpty'), state.single.targets, (item) => removeItem(state.single.targets, item.id));
+    const total = state.single.donors.length * state.single.targets.length;
+    $('singleEquation').textContent = `${state.single.donors.length} × ${state.single.targets.length} = ${total}`;
+    $('singleEquationNote').textContent = total ? `${total} separate face-swap result${total === 1 ? '' : 's'}.` : 'Select at least one donor and one target.';
+    $('startSingle').disabled = state.single.running || total === 0;
+    $('pickSingleDonors').disabled = state.single.running;
+    $('pickSingleTargets').disabled = state.single.running;
+    $('pickSingleDonorFolder').disabled = state.single.running;
+    $('pickSingleTargetFolder').disabled = state.single.running;
+  }
+
+  function singleSettingsPayload() {
+    return {
+      enhancerEnabled: state.settings.enhancerEnabled,
+      custom: { ...state.settings.custom, enhancerEnabled: state.settings.enhancerEnabled },
+    };
+  }
+
+  async function runSingleJob(job, signal) {
+    let lastError;
+    for (let attempt = 0; attempt <= state.settings.retries; attempt += 1) {
+      if (signal.aborted) throw new DOMException('Batch cancelled.', 'AbortError');
+      try {
+        const form = new FormData();
+        form.set('target', await normalizedFile(job.target));
+        form.set('donor', await normalizedFile(job.donor));
+        form.set('engine', state.settings.engine);
+        form.set('settings', JSON.stringify(singleSettingsPayload()));
+        const response = await gatewayFetch('/v1/single', { method: 'POST', body: form, signal });
+        const received = await response.blob();
+        const jpeg = await resultAsJpeg(received);
+        const sequence = String(job.index + 1).padStart(4, '0');
+        const name = `${state.settings.outputPrefix}_${sequence}_${cleanName(job.target.name)}__${cleanName(job.donor.name)}.jpg`;
+        addResult({ name, blob: jpeg, mode: 'Single batch', targetName: job.target.name, donorName: job.donor.name });
+        return;
+      } catch (error) {
+        lastError = error;
+        if (error.name === 'AbortError') throw error;
+        if (attempt < state.settings.retries) {
+          log(`Retrying ${job.target.name} with ${job.donor.name} after error:`, error.message);
+          await new Promise((resolve) => setTimeout(resolve, 900 * (attempt + 1)));
+        }
+      }
+    }
+    throw lastError;
+  }
+
+  async function startSingleBatch(retryOnly = false) {
+    if (state.single.running) return;
+    try { saveSettingsFromForm(false); } catch (error) { toast(error.message, true); switchView('settings'); return; }
+    if (!gatewayUrl()) { toast('Set the private gateway URL first.', true); switchView('settings'); return; }
+    const allJobs = retryOnly ? state.single.failedJobs : state.single.donors.flatMap((donor) => state.single.targets.map((target) => ({ donor, target })));
+    if (!allJobs.length) return;
+    const jobs = allJobs.map((job, index) => ({ ...job, index }));
+    state.single.jobs = jobs;
+    state.single.failedJobs = [];
+    state.single.completed = 0;
+    state.single.failed = 0;
+    state.single.lastError = '';
+    state.single.running = true;
+    state.single.cancelled = false;
+    state.single.controller = new AbortController();
+    const signal = state.single.controller.signal;
+    renderSingleProgress('Preparing batch', 0, jobs.length, 'Opening a private gateway session.');
+    renderAll();
+    log(`Starting single batch with ${jobs.length} job(s).`);
+    try {
+      await beginGatewaySession('single');
+      let cursor = 0;
+      const concurrency = ['aifaceswap_hq', 'faceover_auto', 'fjoy', 'tao'].includes(state.settings.engine)
+        ? 1 : Math.min(state.settings.concurrency, jobs.length);
+      const workers = Array.from({ length: concurrency }, async () => {
+        while (!signal.aborted) {
+          const index = cursor;
+          cursor += 1;
+          if (index >= jobs.length) return;
+          const job = jobs[index];
+          renderSingleProgress('Batch in progress', state.single.completed + state.single.failed, jobs.length, `${job.target.name} ← ${job.donor.name}`);
+          try {
+            await runSingleJob(job, signal);
+            state.single.completed += 1;
+          } catch (error) {
+            if (error.name === 'AbortError') return;
+            state.single.failed += 1;
+            state.single.failedJobs.push(job);
+            state.single.lastError = `${job.target.name} ← ${job.donor.name}: ${error.message}`;
+            log('Single job failed:', state.single.lastError);
+          }
+          renderSingleProgress('Batch in progress', state.single.completed + state.single.failed, jobs.length, `${state.single.completed} saved, ${state.single.failed} failed.`);
+        }
+      });
+      await Promise.all(workers);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        state.single.lastError = error.message;
+        log('Single batch stopped:', error.message);
+      }
+    } finally {
+      await endGatewaySession();
+      state.single.running = false;
+      state.single.cancelled = signal.aborted;
+      const title = signal.aborted ? 'Batch cancelled' : 'Batch complete';
+      const message = `${state.single.completed} saved, ${state.single.failed} failed.`;
+      renderSingleProgress(title, state.single.completed + state.single.failed, jobs.length, message, true);
+      renderAll();
+      if (state.single.completed) toast(`${state.single.completed} result${state.single.completed === 1 ? '' : 's'} ready.`);
+    }
+  }
+
+  function renderSingleProgress(title, value, max, message, finished = false) {
+    $('singleProgressWrap').classList.add('visible');
+    $('singleProgressTitle').textContent = title;
+    $('singleProgress').max = Math.max(1, max);
+    $('singleProgress').value = Math.min(value, Math.max(1, max));
+    $('singleProgressCounts').textContent = `${value} / ${max}`;
+    $('singleProgressMessage').textContent = message || '';
+    $('singleProgressError').textContent = state.single.lastError || '';
+    $('singleProgressError').classList.toggle('hidden', !state.single.lastError);
+    $('cancelSingle').classList.toggle('hidden', !state.single.running);
+    $('retrySingle').classList.toggle('hidden', state.single.running || !state.single.failedJobs.length);
+    $('openSingleResults').classList.toggle('hidden', !state.single.completed);
+    if (finished) $('cancelSingle').classList.add('hidden');
+  }
+
+  function cancelSingle() {
+    if (!state.single.running) return;
+    state.single.controller?.abort();
+    state.single.cancelled = true;
+    toast('Cancelling after the active request stops.');
+  }
+
+  function donorCard(item, index) {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = `donor-card${state.multi.selectedDonorId === item.id ? ' selected' : ''}`;
+    card.title = item.name;
+    const image = document.createElement('img');
+    image.className = 'donor-thumb';
+    image.src = item.url;
+    image.alt = item.name;
+    const label = document.createElement('span');
+    label.className = 'donor-label';
+    label.textContent = letterFor(index);
+    card.append(image, label);
+    card.addEventListener('click', () => selectDonor(item.id));
+    return card;
+  }
+
+  function renderMultiDonors() {
+    const grid = $('multiDonorGrid');
+    grid.replaceChildren();
+    state.multi.donors.forEach((item, index) => grid.append(donorCard(item, index)));
+    $('multiDonorEmpty').classList.toggle('hidden', state.multi.donors.length > 0);
+    $('multiDonorCount').textContent = state.multi.donors.length;
+  }
+
+  function getActiveRow() {
+    return state.multi.rows.find((row) => row.id === state.multi.activeRowId) || null;
+  }
+
+  function selectDonor(donorId) {
+    state.multi.selectedDonorId = donorId;
+    const row = getActiveRow();
+    if (row && Number.isInteger(state.multi.activeFaceIndex) && row.faces[state.multi.activeFaceIndex]) {
+      const wasComplete = rowComplete(row);
+      row.assignments[String(state.multi.activeFaceIndex)] = donorId;
+      row.status = 'ready';
+      row.error = '';
+      if (!wasComplete) advanceFaceOrRow(row);
+      schedulePersist();
+    }
+    renderAll();
+  }
+
+  function advanceFaceOrRow(row) {
+    const next = row.faces.findIndex((face, index) => !row.assignments[String(index)] && index > state.multi.activeFaceIndex);
+    const wrapped = next >= 0 ? next : row.faces.findIndex((face, index) => !row.assignments[String(index)]);
+    if (wrapped >= 0) {
+      state.multi.activeFaceIndex = wrapped;
+      return;
+    }
+    const rowIndex = state.multi.rows.findIndex((candidate) => candidate.id === row.id);
+    const nextRow = state.multi.rows.slice(rowIndex + 1).find((candidate) => candidate.faces.length && !rowComplete(candidate))
+      || state.multi.rows.find((candidate) => candidate.faces.length && !rowComplete(candidate));
+    if (nextRow && nextRow.id !== row.id) {
+      state.multi.activeRowId = nextRow.id;
+      state.multi.activeFaceIndex = nextRow.faces.findIndex((face, index) => !nextRow.assignments[String(index)]);
+      setTimeout(() => document.querySelector(`[data-row-id="${CSS.escape(nextRow.id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    } else {
+      state.multi.activeFaceIndex = row.faces.length ? row.faces.length - 1 : null;
+      toast('All currently analyzed faces have assignments.');
+    }
+  }
+
+  function rowComplete(row) {
+    return row.faces.length > 0 && row.faces.every((face, index) => Boolean(row.assignments[String(index)]));
+  }
+
+  function rowRunnable(row) {
+    return row.faces.length > 0 && Object.keys(row.assignments).some((key) => row.assignments[key]);
+  }
+
+  function rowStatusText(row) {
+    if (row.status === 'analyzing') return 'Analyzing';
+    if (row.status === 'running') return 'Running';
+    if (row.status === 'done') return 'Done';
+    if (row.status === 'failed') return 'Failed';
+    if (!row.faces.length) return 'Needs analysis';
+    if (rowComplete(row)) return 'Complete mapping';
+    if (rowRunnable(row)) return 'Sparse mapping';
+    return 'Choose donors';
+  }
+
+  function renderMultiRows() {
+    const container = $('multiRows');
+    container.replaceChildren();
+    state.multi.rows.forEach((row, index) => container.append(renderMultiRow(row, index)));
+    $('multiRowsEmpty').classList.toggle('hidden', state.multi.rows.length > 0);
+    $('multiRowCount').textContent = `${state.multi.rows.length} / ${MAX_MULTI_ROWS}`;
+    const ready = state.multi.rows.filter(rowRunnable).length;
+    $('multiEquation').textContent = `${ready} ready row${ready === 1 ? '' : 's'}`;
+    const totalMappings = state.multi.rows.reduce((sum, row) => sum + Object.values(row.assignments).filter(Boolean).length, 0);
+    $('multiEquationNote').textContent = ready ? `${totalMappings} face assignment${totalMappings === 1 ? '' : 's'} across the runnable batch.` : 'Analyze a target and assign at least one face.';
+    $('startMulti').disabled = state.multi.running || ready === 0;
+  }
+
+  function renderMultiRow(row, index) {
+    const article = document.createElement('article');
+    article.className = `target-row${state.multi.activeRowId === row.id ? ' active' : ''}${row.status === 'failed' ? ' failed' : ''}`;
+    article.dataset.rowId = row.id;
+    article.addEventListener('click', () => {
+      if (state.multi.activeRowId !== row.id) {
+        state.multi.activeRowId = row.id;
+        state.multi.activeFaceIndex = row.faces.findIndex((face, faceIndex) => !row.assignments[String(faceIndex)]);
+        if (state.multi.activeFaceIndex < 0 && row.faces.length) state.multi.activeFaceIndex = 0;
+        renderAll();
+        schedulePersist();
+      }
+    });
+
+    const head = document.createElement('div');
+    head.className = 'row-head';
+    const number = document.createElement('div'); number.className = 'row-number'; number.textContent = String(index + 1);
+    const title = document.createElement('div'); title.className = 'row-title';
+    const strong = document.createElement('strong'); strong.textContent = row.target.name; strong.title = row.target.name;
+    const subtitle = document.createElement('div'); subtitle.className = 'row-subtitle'; subtitle.textContent = `${row.target.width}×${row.target.height} · ${Object.values(row.assignments).filter(Boolean).length} assigned`;
+    title.append(strong, subtitle);
+    const status = document.createElement('span'); status.className = `status-pill ${row.status}`; status.textContent = rowStatusText(row);
+    head.append(number, title, status);
+    article.append(head);
+
+    const body = document.createElement('div');
+    body.className = 'row-body';
+    body.append(renderTargetPreview(row), renderFacePanel(row));
+    article.append(body);
+
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+    actions.append(
+      actionButton(row.faces.length ? 'Reanalyze' : 'Analyze faces', () => analyzeRow(row), 'button small'),
+      actionButton('Auto assign', () => autoAssignRow(row), 'button small'),
+      actionButton('Same donor', () => sameDonorRow(row), 'button small'),
+      actionButton('Clear mapping', () => clearRowMapping(row), 'button small'),
+      actionButton('Duplicate recipe', () => duplicateRow(row), 'button small'),
+      actionButton('Remove row', () => removeRow(row.id), 'button small danger'),
+    );
+    article.append(actions);
+    if (row.error) {
+      const error = document.createElement('div');
+      error.className = 'error-box';
+      error.textContent = row.error;
+      article.append(error);
+    }
+    return article;
+  }
+
+  function actionButton(text, handler, className = 'button small') {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = className;
+    button.textContent = text;
+    button.disabled = state.multi.running;
+    button.addEventListener('click', (event) => { event.stopPropagation(); handler(); });
+    return button;
+  }
+
+  function renderTargetPreview(row) {
+    const preview = document.createElement('div');
+    preview.className = 'target-preview';
+    const image = document.createElement('img');
+    image.src = row.target.url;
+    image.alt = row.target.name;
+    preview.append(image);
+    image.addEventListener('load', () => positionFaceOverlays(preview, image, row));
+    return preview;
+  }
+
+  function positionFaceOverlays(preview, image, row) {
+    $$('.face-rect, .face-marker', preview).forEach((node) => node.remove());
+    if (!row.faces.length || !image.naturalWidth || !image.naturalHeight) return;
+    const box = preview.getBoundingClientRect();
+    const imageRatio = image.naturalWidth / image.naturalHeight;
+    const boxRatio = box.width / box.height;
+    let renderedWidth, renderedHeight, offsetX, offsetY;
+    if (imageRatio > boxRatio) {
+      renderedWidth = box.width;
+      renderedHeight = box.width / imageRatio;
+      offsetX = 0;
+      offsetY = (box.height - renderedHeight) / 2;
+    } else {
+      renderedHeight = box.height;
+      renderedWidth = box.height * imageRatio;
+      offsetX = (box.width - renderedWidth) / 2;
+      offsetY = 0;
+    }
+    row.faces.forEach((face, faceIndex) => {
+      const [left, top, right, bottom] = face.map(Number);
+      const rect = document.createElement('div');
+      rect.className = `face-rect${state.multi.activeRowId === row.id && state.multi.activeFaceIndex === faceIndex ? ' active' : ''}`;
+      rect.style.left = `${offsetX + (left / row.target.width) * renderedWidth}px`;
+      rect.style.top = `${offsetY + (top / row.target.height) * renderedHeight}px`;
+      rect.style.width = `${Math.max(2, ((right - left) / row.target.width) * renderedWidth)}px`;
+      rect.style.height = `${Math.max(2, ((bottom - top) / row.target.height) * renderedHeight)}px`;
+      preview.append(rect);
+      const marker = document.createElement('div');
+      marker.className = 'face-marker';
+      marker.textContent = letterFor(faceIndex);
+      const markerTop = offsetY + (top / row.target.height) * renderedHeight;
+      marker.style.left = `${Math.max(2, offsetX + (left / row.target.width) * renderedWidth)}px`;
+      marker.style.top = `${markerTop >= 27 ? markerTop - 26 : markerTop + 3}px`;
+      preview.append(marker);
+    });
+  }
+
+  function renderFacePanel(row) {
+    const panel = document.createElement('div');
+    panel.className = 'face-panel';
+    const prompt = document.createElement('div');
+    prompt.className = 'prompt';
+    if (row.status === 'analyzing') prompt.textContent = 'Detecting faces…';
+    else if (!row.faces.length) prompt.textContent = 'Analyze this image to detect its faces.';
+    else {
+      const active = state.multi.activeRowId === row.id ? state.multi.activeFaceIndex : null;
+      prompt.textContent = Number.isInteger(active)
+        ? `Choose a donor for Face ${letterFor(active)}. Selecting a donor advances automatically.`
+        : 'Tap a face below, then choose a donor from the donor grid.';
+    }
+    panel.append(prompt);
+    const grid = document.createElement('div');
+    grid.className = 'face-grid';
+    row.faces.forEach((face, faceIndex) => grid.append(renderFaceCard(row, face, faceIndex)));
+    panel.append(grid);
+    return panel;
+  }
+
+  function renderFaceCard(row, face, faceIndex) {
+    const donorId = row.assignments[String(faceIndex)];
+    const donor = state.multi.donors.find((item) => item.id === donorId);
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = `face-card${state.multi.activeRowId === row.id && state.multi.activeFaceIndex === faceIndex ? ' active' : ''}${donor ? ' assigned' : ''}`;
+    const image = document.createElement('img');
+    image.className = 'face-crop';
+    image.alt = `Face ${letterFor(faceIndex)}`;
+    image.src = row.cropUrls?.[faceIndex] || row.target.url;
+    if (!row.cropUrls?.[faceIndex]) createFaceCrop(row, face, faceIndex).then((url) => { if (url && image.isConnected) image.src = url; }).catch(() => {});
+    const name = document.createElement('div'); name.className = 'face-name'; name.textContent = `Face ${letterFor(faceIndex)}`;
+    const assignment = document.createElement('div'); assignment.className = 'assignment-name'; assignment.textContent = donor ? donor.name : 'Unassigned';
+    card.append(image, name, assignment);
+    card.addEventListener('click', (event) => {
+      event.stopPropagation();
+      state.multi.activeRowId = row.id;
+      state.multi.activeFaceIndex = faceIndex;
+      renderAll();
+      schedulePersist();
+    });
+    return card;
+  }
+
+  async function createFaceCrop(row, face, faceIndex) {
+    row.cropUrls ||= {};
+    if (row.cropUrls[faceIndex]) return row.cropUrls[faceIndex];
+    const bitmap = await createImageBitmap(row.target.file, { imageOrientation: 'from-image' });
+    const [left, top, right, bottom] = face.map(Number);
+    const width = Math.max(1, right - left);
+    const height = Math.max(1, bottom - top);
+    const padding = Math.round(Math.max(width, height) * .18);
+    const sx = Math.max(0, left - padding);
+    const sy = Math.max(0, top - padding);
+    const sw = Math.min(bitmap.width - sx, width + padding * 2);
+    const sh = Math.min(bitmap.height - sy, height + padding * 2);
+    const canvas = document.createElement('canvas');
+    canvas.width = 180;
+    canvas.height = 180;
+    const context = canvas.getContext('2d');
+    context.drawImage(bitmap, sx, sy, sw, sh, 0, 0, 180, 180);
+    bitmap.close();
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', .9));
+    const url = URL.createObjectURL(blob);
+    row.cropUrls[faceIndex] = url;
+    return url;
+  }
+
+  async function analyzeRow(row, silent = false) {
+    if (row.status === 'analyzing' || state.multi.running) return;
+    if (!gatewayUrl()) { toast('Set the private gateway URL first.', true); switchView('settings'); return; }
+    row.status = 'analyzing';
+    row.error = '';
+    renderAll();
+    try {
+      const form = new FormData();
+      form.set('target', await normalizedFile(row.target));
+      const response = await gatewayFetch('/v1/analyze', { method: 'POST', body: form });
+      const payload = await response.json();
+      if (!Array.isArray(payload.faces)) throw new Error('The gateway did not return a face list.');
+      const newFaces = payload.faces.map((face) => face.map(Number)).filter((face) => face.length === 4 && face.every(Number.isFinite));
+      const oldFaces = row.faces;
+      const oldAssignments = { ...row.assignments };
+      row.faces = newFaces;
+      row.assignments = oldFaces.length ? reconcileAssignments(oldFaces, newFaces, oldAssignments, row.target.width, row.target.height) : {};
+      row.analyzedAt = Date.now();
+      row.status = rowRunnable(row) ? 'ready' : 'new';
+      Object.values(row.cropUrls || {}).forEach((url) => URL.revokeObjectURL(url));
+      row.cropUrls = {};
+      state.multi.activeRowId = row.id;
+      const next = row.faces.findIndex((face, index) => !row.assignments[String(index)]);
+      state.multi.activeFaceIndex = next >= 0 ? next : (row.faces.length ? 0 : null);
+      if (!silent) toast(`${row.faces.length} face${row.faces.length === 1 ? '' : 's'} detected.`);
+      log(`Analyzed ${row.target.name}: ${row.faces.length} face(s).`);
+    } catch (error) {
+      row.status = 'failed';
+      row.error = error.message;
+      log(`Analysis failed for ${row.target.name}:`, error.message);
+      if (!silent) toast(error.message, true);
+    }
+    schedulePersist();
+    renderAll();
+  }
+
+  function normalizedFace(face, width, height) {
+    return [face[0] / width, face[1] / height, face[2] / width, face[3] / height];
+  }
+
+  function boxIou(left, right) {
+    const x1 = Math.max(left[0], right[0]);
+    const y1 = Math.max(left[1], right[1]);
+    const x2 = Math.min(left[2], right[2]);
+    const y2 = Math.min(left[3], right[3]);
+    const intersection = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+    const areaLeft = Math.max(0, left[2] - left[0]) * Math.max(0, left[3] - left[1]);
+    const areaRight = Math.max(0, right[2] - right[0]) * Math.max(0, right[3] - right[1]);
+    const union = areaLeft + areaRight - intersection;
+    return union > 0 ? intersection / union : 0;
+  }
+
+  function centerDistance(left, right) {
+    const lx = (left[0] + left[2]) / 2, ly = (left[1] + left[3]) / 2;
+    const rx = (right[0] + right[2]) / 2, ry = (right[1] + right[3]) / 2;
+    return Math.hypot(lx - rx, ly - ry);
+  }
+
+  function reconcileAssignments(oldFaces, newFaces, assignments, width, height) {
+    const output = {};
+    const used = new Set();
+    const safeWidth = Math.max(1, Number(width) || 1);
+    const safeHeight = Math.max(1, Number(height) || 1);
+    const oldNorm = oldFaces.map((face) => normalizedFace(face, safeWidth, safeHeight));
+    const newNorm = newFaces.map((face) => normalizedFace(face, safeWidth, safeHeight));
+    for (const [oldIndexText, donorId] of Object.entries(assignments)) {
+      if (!donorId) continue;
+      const oldIndex = Number(oldIndexText);
+      const oldFace = oldNorm[oldIndex];
+      if (!oldFace) continue;
+      let bestIndex = -1;
+      let bestScore = -Infinity;
+      newNorm.forEach((newFace, newIndex) => {
+        if (used.has(newIndex)) return;
+        const score = boxIou(oldFace, newFace) * 2 - centerDistance(oldFace, newFace);
+        if (score > bestScore) { bestScore = score; bestIndex = newIndex; }
+      });
+      if (bestIndex < 0 || bestScore < -.35) throw new Error('A refreshed face analysis could not safely match the prior mapping. Review this row before running it.');
+      output[String(bestIndex)] = donorId;
+      used.add(bestIndex);
+    }
+    return output;
+  }
+
+  async function analyzeAllRows() {
+    for (const row of state.multi.rows) {
+      if (!row.faces.length || row.status === 'failed') await analyzeRow(row, true);
+    }
+    toast('Finished analyzing available rows.');
+  }
+
+  function autoAssignRow(row) {
+    if (!row.faces.length) { toast('Analyze this target first.', true); return; }
+    if (!state.multi.donors.length) { toast('Load donor images first.', true); return; }
+    row.assignments = {};
+    row.faces.forEach((face, index) => { row.assignments[String(index)] = state.multi.donors[index % state.multi.donors.length].id; });
+    row.status = 'ready';
+    state.multi.activeRowId = row.id;
+    state.multi.activeFaceIndex = row.faces.length - 1;
+    advanceFaceOrRow(row);
+    schedulePersist();
+    renderAll();
+  }
+
+  function sameDonorRow(row) {
+    if (!row.faces.length) { toast('Analyze this target first.', true); return; }
+    const donorId = state.multi.selectedDonorId || state.multi.donors[0]?.id;
+    if (!donorId) { toast('Load and select a donor first.', true); return; }
+    row.assignments = {};
+    row.faces.forEach((face, index) => { row.assignments[String(index)] = donorId; });
+    row.status = 'ready';
+    state.multi.activeRowId = row.id;
+    state.multi.activeFaceIndex = row.faces.length - 1;
+    advanceFaceOrRow(row);
+    schedulePersist();
+    renderAll();
+  }
+
+  function clearRowMapping(row) {
+    row.assignments = {};
+    row.status = row.faces.length ? 'new' : row.status;
+    row.error = '';
+    state.multi.activeRowId = row.id;
+    state.multi.activeFaceIndex = row.faces.length ? 0 : null;
+    schedulePersist();
+    renderAll();
+  }
+
+  function duplicateRow(row) {
+    if (state.multi.rows.length >= MAX_MULTI_ROWS) { toast('The 100-row limit has been reached.', true); return; }
+    const clone = {
+      id: makeId('row'),
+      target: row.target,
+      faces: row.faces.map((face) => [...face]),
+      assignments: { ...row.assignments },
+      analyzedAt: row.analyzedAt,
+      status: rowRunnable(row) ? 'ready' : (row.faces.length ? 'new' : 'new'),
+      error: '',
+      resultId: null,
+      cropUrls: {},
+    };
+    const index = state.multi.rows.findIndex((candidate) => candidate.id === row.id);
+    state.multi.rows.splice(index + 1, 0, clone);
+    state.multi.activeRowId = clone.id;
+    state.multi.activeFaceIndex = clone.faces.findIndex((face, faceIndex) => !clone.assignments[String(faceIndex)]);
+    if (state.multi.activeFaceIndex < 0 && clone.faces.length) state.multi.activeFaceIndex = 0;
+    schedulePersist();
+    renderAll();
+    setTimeout(() => document.querySelector(`[data-row-id="${CSS.escape(clone.id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
+
+  function removeRow(id) {
+    const index = state.multi.rows.findIndex((row) => row.id === id);
+    if (index < 0) return;
+    const [row] = state.multi.rows.splice(index, 1);
+    Object.values(row.cropUrls || {}).forEach((url) => URL.revokeObjectURL(url));
+    if (state.multi.activeRowId === id) {
+      const next = state.multi.rows[Math.min(index, state.multi.rows.length - 1)];
+      state.multi.activeRowId = next?.id || null;
+      state.multi.activeFaceIndex = next?.faces.length ? 0 : null;
+    }
+    schedulePersist();
+    renderAll();
+  }
+
+  async function addMultiTargets(files) {
+    const capacity = MAX_MULTI_ROWS - state.multi.rows.length;
+    if (capacity <= 0) { toast('The 100-row limit has been reached.', true); return; }
+    const temp = [];
+    const added = await addFiles([...files].slice(0, capacity), temp, capacity, 'Target row');
+    added.forEach((target) => state.multi.rows.push({
+      id: makeId('row'),
+      target,
+      faces: [],
+      assignments: {},
+      analyzedAt: 0,
+      status: 'new',
+      error: '',
+      resultId: null,
+      cropUrls: {},
+    }));
+    if (!state.multi.activeRowId && state.multi.rows.length) state.multi.activeRowId = state.multi.rows[0].id;
+    schedulePersist();
+    renderAll();
+  }
+
+  async function refreshRowIfStale(row) {
+    if (Date.now() - row.analyzedAt <= STALE_ANALYSIS_MS) return;
+    const beforeStatus = row.status;
+    await analyzeRow(row, true);
+    if (row.status === 'failed') throw new Error(row.error || 'Target reanalysis failed.');
+    row.status = beforeStatus === 'done' ? 'ready' : row.status;
+  }
+
+  async function runMultiRow(row, index, signal) {
+    await refreshRowIfStale(row);
+    const assignments = Object.entries(row.assignments)
+      .filter(([, donorId]) => donorId && state.multi.donors.some((donor) => donor.id === donorId))
+      .map(([faceIndex, donorId]) => ({ faceIndex: Number(faceIndex), donorId }));
+    if (!assignments.length) throw new Error('This row has no valid assignments.');
+    const uniqueDonorIds = [...new Set(assignments.map((entry) => entry.donorId))];
+    const form = new FormData();
+    form.set('target', await normalizedFile(row.target));
+    for (const donorId of uniqueDonorIds) {
+      const donor = state.multi.donors.find((item) => item.id === donorId);
+      if (!donor) throw new Error('A mapped donor was removed.');
+      form.set(`donor_${donorId}`, await normalizedFile(donor));
+    }
+    form.set('assignments', JSON.stringify(assignments));
+    const response = await gatewayFetch('/v1/multi', { method: 'POST', body: form, signal });
+    const received = await response.blob();
+    const jpeg = await resultAsJpeg(received);
+    const sequence = String(index + 1).padStart(4, '0');
+    const mappingLabel = assignments.map((entry) => `${letterFor(entry.faceIndex)}${letterFor(state.multi.donors.findIndex((donor) => donor.id === entry.donorId))}`).join('-');
+    const name = `${state.settings.outputPrefix}_multi_${sequence}_${cleanName(row.target.name)}_${mappingLabel || 'mapped'}.jpg`;
+    const result = addResult({ name, blob: jpeg, mode: 'Multi-face', targetName: row.target.name, donorName: mappingLabel });
+    row.resultId = result.id;
+  }
+
+  async function startMultiBatch(retryOnly = false) {
+    if (state.multi.running) return;
+    try { saveSettingsFromForm(false); } catch (error) { toast(error.message, true); switchView('settings'); return; }
+    if (!gatewayUrl()) { toast('Set the private gateway URL first.', true); switchView('settings'); return; }
+    const rows = (retryOnly ? state.multi.rows.filter((row) => row.status === 'failed') : state.multi.rows.filter(rowRunnable));
+    if (!rows.length) return;
+    state.multi.running = true;
+    state.multi.cancelled = false;
+    state.multi.controller = new AbortController();
+    state.multi.completed = 0;
+    state.multi.failed = 0;
+    state.multi.lastError = '';
+    const signal = state.multi.controller.signal;
+    renderMultiProgress('Preparing multi-face batch', 0, rows.length, 'Opening a private gateway session.');
+    renderAll();
+    log(`Starting multi-face batch with ${rows.length} row(s).`);
+    try {
+      await beginGatewaySession('multi');
+      for (let index = 0; index < rows.length; index += 1) {
+        if (signal.aborted) break;
+        const row = rows[index];
+        state.multi.activeRowId = row.id;
+        row.status = 'running';
+        row.error = '';
+        renderMultiProgress('Multi-face batch in progress', index, rows.length, row.target.name);
+        renderAll();
+        try {
+          await runMultiRow(row, index, signal);
+          row.status = 'done';
+          state.multi.completed += 1;
+        } catch (error) {
+          if (error.name === 'AbortError') break;
+          row.status = 'failed';
+          row.error = error.message;
+          state.multi.failed += 1;
+          state.multi.lastError = `${row.target.name}: ${error.message}`;
+          log('Multi-face row failed:', state.multi.lastError);
+        }
+        renderMultiProgress('Multi-face batch in progress', index + 1, rows.length, `${state.multi.completed} saved, ${state.multi.failed} failed.`);
+        schedulePersist();
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        state.multi.lastError = error.message;
+        log('Multi-face batch stopped:', error.message);
+      }
+    } finally {
+      await endGatewaySession();
+      state.multi.running = false;
+      state.multi.cancelled = signal.aborted;
+      const title = signal.aborted ? 'Multi-face batch cancelled' : 'Multi-face batch complete';
+      renderMultiProgress(title, state.multi.completed + state.multi.failed, rows.length, `${state.multi.completed} saved, ${state.multi.failed} failed.`, true);
+      schedulePersist();
+      renderAll();
+      if (state.multi.completed) toast(`${state.multi.completed} multi-face result${state.multi.completed === 1 ? '' : 's'} ready.`);
+    }
+  }
+
+  function renderMultiProgress(title, value, max, message, finished = false) {
+    $('multiProgressWrap').classList.add('visible');
+    $('multiProgressTitle').textContent = title;
+    $('multiProgress').max = Math.max(1, max);
+    $('multiProgress').value = Math.min(value, Math.max(1, max));
+    $('multiProgressCounts').textContent = `${value} / ${max}`;
+    $('multiProgressMessage').textContent = message || '';
+    $('multiProgressError').textContent = state.multi.lastError || '';
+    $('multiProgressError').classList.toggle('hidden', !state.multi.lastError);
+    $('cancelMulti').classList.toggle('hidden', !state.multi.running);
+    $('retryMulti').classList.toggle('hidden', state.multi.running || !state.multi.rows.some((row) => row.status === 'failed'));
+    $('openMultiResults').classList.toggle('hidden', !state.multi.completed);
+    if (finished) $('cancelMulti').classList.add('hidden');
+  }
+
+  function cancelMulti() {
+    if (!state.multi.running) return;
+    state.multi.controller?.abort();
+    state.multi.cancelled = true;
+    toast('Cancelling after the active request stops.');
+  }
+
+  function addResult({ name, blob, mode, targetName, donorName }) {
+    const result = {
+      id: makeId('result'),
+      name,
+      blob,
+      url: URL.createObjectURL(blob),
+      mode,
+      targetName,
+      donorName,
+      createdAt: Date.now(),
+    };
+    state.results.push(result);
+    renderResults();
+    return result;
+  }
+
+  function renderResults() {
+    const grid = $('resultsGrid');
+    grid.replaceChildren();
+    state.results.forEach((result) => {
+      const card = document.createElement('article');
+      card.className = 'result-card';
+      const image = document.createElement('img');
+      image.className = 'result-thumb';
+      image.src = result.url;
+      image.alt = result.name;
+      const meta = document.createElement('div'); meta.className = 'result-meta';
+      const name = document.createElement('div'); name.className = 'filename'; name.textContent = result.name; name.title = result.name;
+      const detail = document.createElement('div'); detail.className = 'file-detail'; detail.textContent = `${result.mode} · ${formatBytes(result.blob.size)}`;
+      meta.append(name, detail);
+      const actions = document.createElement('div'); actions.className = 'result-actions';
+      const download = actionButton('Download', () => downloadBlob(result.blob, result.name), 'button small primary');
+      const remove = actionButton('Remove', () => removeResult(result.id), 'button small danger');
+      actions.append(download, remove);
+      card.append(image, meta, actions);
+      grid.append(card);
+    });
+    $('resultsEmpty').classList.toggle('hidden', state.results.length > 0);
+    $('downloadAllResults').disabled = !state.results.length;
+    $('clearResults').disabled = !state.results.length;
+    $('resultCountTab').textContent = state.results.length ? `(${state.results.length})` : '';
+  }
+
+  function removeResult(id) {
+    const index = state.results.findIndex((result) => result.id === id);
+    if (index < 0) return;
+    const [result] = state.results.splice(index, 1);
+    URL.revokeObjectURL(result.url);
+    renderResults();
+  }
+
+  function clearResults() {
+    state.results.forEach((result) => URL.revokeObjectURL(result.url));
+    state.results = [];
+    renderResults();
+  }
+
+  function downloadBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = name;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+
+  const crcTable = (() => {
+    const table = new Uint32Array(256);
+    for (let index = 0; index < 256; index += 1) {
+      let value = index;
+      for (let bit = 0; bit < 8; bit += 1) value = (value & 1) ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1);
+      table[index] = value >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes) {
+    let crc = 0xffffffff;
+    for (const byte of bytes) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+    return (crc ^ 0xffffffff) >>> 0;
+  }
+
+  function dosDateTime(date = new Date()) {
+    const year = Math.max(1980, date.getFullYear());
+    return {
+      time: (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2),
+      date: ((year - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate(),
+    };
+  }
+
+  function uint16(value) { const bytes = new Uint8Array(2); new DataView(bytes.buffer).setUint16(0, value, true); return bytes; }
+  function uint32(value) { const bytes = new Uint8Array(4); new DataView(bytes.buffer).setUint32(0, value >>> 0, true); return bytes; }
+  function joinArrays(arrays) {
+    const total = arrays.reduce((sum, array) => sum + array.length, 0);
+    const output = new Uint8Array(total);
+    let offset = 0;
+    arrays.forEach((array) => { output.set(array, offset); offset += array.length; });
+    return output;
+  }
+
+  async function buildZip(entries) {
+    const encoder = new TextEncoder();
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+    for (const entry of entries) {
+      const name = encoder.encode(entry.name);
+      const data = new Uint8Array(await entry.blob.arrayBuffer());
+      const crc = crc32(data);
+      const timestamp = dosDateTime(new Date(entry.createdAt || Date.now()));
+      const localHeader = joinArrays([
+        uint32(0x04034b50), uint16(20), uint16(0x0800), uint16(0), uint16(timestamp.time), uint16(timestamp.date),
+        uint32(crc), uint32(data.length), uint32(data.length), uint16(name.length), uint16(0), name,
+      ]);
+      localParts.push(localHeader, data);
+      const centralHeader = joinArrays([
+        uint32(0x02014b50), uint16(20), uint16(20), uint16(0x0800), uint16(0), uint16(timestamp.time), uint16(timestamp.date),
+        uint32(crc), uint32(data.length), uint32(data.length), uint16(name.length), uint16(0), uint16(0), uint16(0), uint16(0),
+        uint32(0), uint32(offset), name,
+      ]);
+      centralParts.push(centralHeader);
+      offset += localHeader.length + data.length;
+    }
+    const central = joinArrays(centralParts);
+    const end = joinArrays([
+      uint32(0x06054b50), uint16(0), uint16(0), uint16(entries.length), uint16(entries.length),
+      uint32(central.length), uint32(offset), uint16(0),
+    ]);
+    return new Blob([...localParts, central, end], { type: 'application/zip' });
+  }
+
+  async function downloadAllResults() {
+    if (!state.results.length) return;
+    toast('Building ZIP…');
+    const zip = await buildZip(state.results);
+    downloadBlob(zip, `${state.settings.outputPrefix}_results_${new Date().toISOString().slice(0, 10)}.zip`);
+  }
+
+  function switchView(name) {
+    state.activeView = name;
+    $$('.view').forEach((view) => view.classList.toggle('active', view.id === `view-${name}`));
+    $$('.mode-tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.view === name));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderAll() {
+    renderSingle();
+    renderMultiDonors();
+    renderMultiRows();
+    renderResults();
+  }
+
+  async function freshSession() {
+    if (!confirm('Clear the saved browser draft, loaded images, mappings, and current results?')) return;
+    [...state.single.donors, ...state.single.targets, ...state.multi.donors, ...state.multi.rows.map((row) => row.target)].forEach(revokeItem);
+    clearResults();
+    state.single.donors = [];
+    state.single.targets = [];
+    state.single.failedJobs = [];
+    state.multi.donors = [];
+    state.multi.rows = [];
+    state.multi.activeRowId = null;
+    state.multi.activeFaceIndex = null;
+    state.multi.selectedDonorId = null;
+    await clearDatabase();
+    renderAll();
+    toast('Started a fresh session.');
+    log('Browser session cleared.');
+  }
+
+  function exportDiagnostics() {
+    const diagnostic = {
+      app: 'FaceBatch Web',
+      version: VERSION,
+      exportedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      secureContext: window.isSecureContext,
+      gatewayConfigured: Boolean(gatewayUrl()),
+      engine: state.settings.engine,
+      single: {
+        donors: state.single.donors.length,
+        targets: state.single.targets.length,
+        completed: state.single.completed,
+        failed: state.single.failed,
+      },
+      multi: {
+        donors: state.multi.donors.length,
+        rows: state.multi.rows.length,
+        runnableRows: state.multi.rows.filter(rowRunnable).length,
+        completed: state.multi.completed,
+        failed: state.multi.failed,
+      },
+      results: state.results.length,
+      logs: state.logs,
+    };
+    downloadBlob(new Blob([JSON.stringify(diagnostic, null, 2)], { type: 'application/json' }), `FaceBatch-diagnostics-${Date.now()}.json`);
+  }
+
+  function clearCollection(collection) {
+    collection.splice(0).forEach((item) => { if (!fileReferencedElsewhere(item.id)) revokeItem(item); });
+    schedulePersist();
+    renderAll();
+  }
+
+  function bindPicker(buttonId, inputId, handler) {
+    $(buttonId).addEventListener('click', () => $(inputId).click());
+    $(inputId).addEventListener('change', async (event) => {
+      const files = [...event.target.files];
+      event.target.value = '';
+      await handler(files);
+    });
+  }
+
+  function bindEvents() {
+    $$('.mode-tab').forEach((button) => button.addEventListener('click', () => switchView(button.dataset.view)));
+    $('topSettings').addEventListener('click', () => switchView('settings'));
+    $('gatewayBadge').addEventListener('click', () => testGateway().catch(() => {}));
+
+    bindPicker('pickSingleDonors', 'inputSingleDonors', (files) => addFiles(files, state.single.donors, MAX_SINGLE_FILES, 'Donor'));
+    bindPicker('pickSingleDonorFolder', 'inputSingleDonorFolder', (files) => addFiles(files, state.single.donors, MAX_SINGLE_FILES, 'Donor'));
+    bindPicker('pickSingleTargets', 'inputSingleTargets', (files) => addFiles(files, state.single.targets, MAX_SINGLE_FILES, 'Target'));
+    bindPicker('pickSingleTargetFolder', 'inputSingleTargetFolder', (files) => addFiles(files, state.single.targets, MAX_SINGLE_FILES, 'Target'));
+    $('clearSingleDonors').addEventListener('click', () => clearCollection(state.single.donors));
+    $('clearSingleTargets').addEventListener('click', () => clearCollection(state.single.targets));
+    $('startSingle').addEventListener('click', () => startSingleBatch(false));
+    $('cancelSingle').addEventListener('click', cancelSingle);
+    $('retrySingle').addEventListener('click', () => startSingleBatch(true));
+    $('openSingleResults').addEventListener('click', () => switchView('results'));
+
+    bindPicker('pickMultiDonors', 'inputMultiDonors', (files) => addFiles(files, state.multi.donors, MAX_MULTI_DONORS, 'Donor'));
+    bindPicker('pickMultiDonorFolder', 'inputMultiDonorFolder', (files) => addFiles(files, state.multi.donors, MAX_MULTI_DONORS, 'Donor'));
+    bindPicker('pickMultiTargets', 'inputMultiTargets', addMultiTargets);
+    bindPicker('pickMultiTargetFolder', 'inputMultiTargetFolder', addMultiTargets);
+    $('clearMultiDonors').addEventListener('click', () => {
+      clearCollection(state.multi.donors);
+      state.multi.rows.forEach((row) => { row.assignments = {}; if (row.status === 'ready') row.status = 'new'; });
+      schedulePersist();
+      renderAll();
+    });
+    $('clearMultiRows').addEventListener('click', () => {
+      state.multi.rows.forEach((row) => Object.values(row.cropUrls || {}).forEach((url) => URL.revokeObjectURL(url)));
+      state.multi.rows = [];
+      state.multi.activeRowId = null;
+      state.multi.activeFaceIndex = null;
+      schedulePersist();
+      renderAll();
+    });
+    $('analyzeAllRows').addEventListener('click', analyzeAllRows);
+    $('startMulti').addEventListener('click', () => startMultiBatch(false));
+    $('cancelMulti').addEventListener('click', cancelMulti);
+    $('retryMulti').addEventListener('click', () => startMultiBatch(true));
+    $('openMultiResults').addEventListener('click', () => switchView('results'));
+
+    $('downloadAllResults').addEventListener('click', downloadAllResults);
+    $('clearResults').addEventListener('click', clearResults);
+
+    $('settingEngine').addEventListener('change', updateCustomSettingsVisibility);
+    $('loadDeveloperPreset').addEventListener('click', loadDeveloperApiPreset);
+    $('saveSettings').addEventListener('click', () => {
+      try { saveSettingsFromForm(true); } catch (error) { toast(error.message, true); }
+    });
+    $('testGateway').addEventListener('click', () => {
+      try { saveSettingsFromForm(false); testGateway().catch(() => {}); } catch (error) { toast(error.message, true); }
+    });
+    $('newSession').addEventListener('click', freshSession);
+    $('exportDiagnostics').addEventListener('click', exportDiagnostics);
+    window.addEventListener('resize', () => renderMultiRows());
+    window.addEventListener('beforeunload', () => persistState().catch(() => {}));
+  }
+
+  async function init() {
+    loadSettings();
+    populateSettingsForm();
+    bindEvents();
+    log(`FaceBatch Web ${VERSION} starting.`);
+    try {
+      state.db = await openDb();
+      await restoreDraft();
+    } catch (error) {
+      log('Browser draft storage is unavailable:', error.message);
+    }
+    renderAll();
+    if (gatewayUrl()) testGateway().catch(() => {});
+  }
+
+  init().catch((error) => {
+    log('Startup failed:', error.message);
+    toast(`Startup failed: ${error.message}`, true);
+  });
+})();
+</script>
+</body>
+</html>

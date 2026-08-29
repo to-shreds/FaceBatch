@@ -1,0 +1,7 @@
+FaceBatch Personal Project License
+
+Copyright (c) 2026 Jon Jablon. All rights reserved.
+
+This repository and its contents are a private personal development snapshot. No license is granted to copy, publish, distribute, sublicense, sell, or create derivative works except with the copyright holder's express written permission.
+
+Third-party services, protocols, names, and trademarks remain the property of their respective owners. This snapshot does not grant rights to any third-party service or content.

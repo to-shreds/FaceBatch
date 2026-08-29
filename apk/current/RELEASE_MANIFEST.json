@@ -1,0 +1,28 @@
+{
+  "release": "FaceBatch 0.7.0",
+  "date": "2026-08-27",
+  "package": "com.jon.facebatch",
+  "version_name": "0.7.0",
+  "version_code": 13,
+  "min_sdk": 29,
+  "target_sdk": 34,
+  "signing_certificate_sha256": "999d07c46a3afe2bb1fa3e3b9039b6ea468dddf579c65684597725cfbe6f6f3a",
+  "artifacts": {
+    "apk": {
+      "filename": "FaceBatch-0.7.0.apk",
+      "present": false,
+      "sha256": "16659b7a3408e0d402e74092df23970c41382bb58370cc6ba75b6965635929bb"
+    },
+    "source_zip": {
+      "filename": "FaceBatch-0.7.0-source.zip",
+      "present": false,
+      "sha256": "efcd31d66fab87a579a211fd39d80e8faae19c0ea8c0ad89e328f41626d06a36"
+    },
+    "build_report": {
+      "filename": "FaceBatch-0.7.0-build-report.txt",
+      "present": false,
+      "sha256": "9e46626b0208260b9cf37fd4542f40381781a6bc7a1ddde133f7df6fc1223611"
+    }
+  },
+  "status": "release identity preserved; original bytes unavailable in active workspace"
+}

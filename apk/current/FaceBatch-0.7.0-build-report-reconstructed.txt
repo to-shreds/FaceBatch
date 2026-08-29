@@ -1,0 +1,47 @@
+FaceBatch 0.7.0 reconstructed release record
+Date: 2026-08-27
+
+Release identity
+- Package: com.jon.facebatch
+- Version code: 13
+- Version name: 0.7.0
+- Minimum SDK: 29
+- Target SDK: 34
+- Signing certificate SHA-256: 999d07c46a3afe2bb1fa3e3b9039b6ea468dddf579c65684597725cfbe6f6f3a
+- Signing certificate matches FaceBatch 0.6.0.
+
+Implemented
+- Donor thumbnails wrap into a full-width, vertically expanding grid.
+- Every loaded donor remains visible through the main page scroll.
+- Donor A/B/C labels render below their image boxes.
+- A live prompt identifies the target face awaiting a donor.
+- Donor selection advances to the next unassigned face in detected display order.
+- Completing a row selects the next unfinished target row automatically.
+- Completed rows can still be edited without an unwanted row jump.
+- Auto Assign and Same Donor use the same completion navigation.
+- Sparse mappings and manual face selection remain supported.
+
+Preserved from 0.6.0
+- One target can be copied into multiple ordered recipe rows with independent mappings.
+- Multiple target images or a target folder can be configured row by row.
+- Shared donor images, sparse mappings, sequential execution, stable numbering, continuation after failures, retry-failed rows, stale-analysis refresh, normalized geometry reconciliation, and a 100-row maximum remain present.
+- Multi-face generation uses AIFaceSwap and does not silently fall back to FJoy.
+
+Regression evidence recorded in the original report
+- Android resource compilation, Java compilation, and D8 conversion passed.
+- MultiFaceEditorFlowTest passed 27 assertions.
+- ZIP integrity and 4-byte APK alignment passed.
+- APK signatures verified under v1, v2, and v3.
+- DEX inspection found WrappingGridLayout, MultiFaceEditorFlow, face and row auto-advance methods, and the existing AIFaceSwap endpoints.
+- Existing production Java files other than MainActivity.java were byte-identical to 0.6.0. MainActivity changes were limited to the multi-face editor.
+
+Recorded test limits
+- No separate 0.7.0 Android device or emulator UI run was available in the build environment.
+- No new live 0.7.0 API call was made because the already validated provider protocol did not change.
+
+Expected artifact SHA-256 values
+- FaceBatch-0.7.0.apk: 16659b7a3408e0d402e74092df23970c41382bb58370cc6ba75b6965635929bb
+- FaceBatch-0.7.0-source.zip: efcd31d66fab87a579a211fd39d80e8faae19c0ea8c0ad89e328f41626d06a36
+- Original build report: 9e46626b0208260b9cf37fd4542f40381781a6bc7a1ddde133f7df6fc1223611
+
+This reconstructed text is a preservation aid, not a byte-identical substitute for the original report.
