@@ -1,0 +1,67 @@
+name: Reconcile FaceBatch snapshot metadata
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/reconcile-snapshot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Reconcile validation and inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          root = Path('.')
+          validator = root / 'scripts' / 'validate_snapshot.py'
+          text = validator.read_text(encoding='utf-8')
+          old = """scrubbed = ROOT / 'apk' / 'archive' / 'FaceBatch-0.4.0-source-scrubbed.zip'\nif not scrubbed.exists():\n    fail('Sanitized Android source ZIP is missing')\nelse:\n    try:\n        with zipfile.ZipFile(scrubbed) as archive:\n            bad = archive.testzip()\n            if bad:\n                fail(f'Sanitized source ZIP has a corrupt entry: {bad}')\n            forbidden = [name for name in archive.namelist() if Path(name).suffix.lower() in {'.jks', '.keystore', '.p12', '.pfx'}]\n            if forbidden:\n                fail('Sanitized source ZIP contains signing material')\n    except zipfile.BadZipFile:\n        fail('Sanitized source ZIP is invalid')\n"""
+          new = """source_tree = ROOT / 'apk' / 'archive' / 'FaceBatch-0.4.0-source'\nrequired_source = [\n    source_tree / 'README.md',\n    source_tree / 'SIGNING.txt',\n    source_tree / 'app' / 'build.gradle',\n    source_tree / 'app' / 'src' / 'main' / 'AndroidManifest.xml',\n    source_tree / 'app' / 'src' / 'main' / 'java' / 'com' / 'jon' / 'facebatch' / 'MainActivity.java',\n]\nfor required in required_source:\n    if not required.exists():\n        fail(f'Sanitized Android source path is missing: {required.relative_to(ROOT)}')\n\nscrubbed = ROOT / 'apk' / 'archive' / 'FaceBatch-0.4.0-source-scrubbed.zip'\nif scrubbed.exists():\n    try:\n        with zipfile.ZipFile(scrubbed) as archive:\n            bad = archive.testzip()\n            if bad:\n                fail(f'Sanitized source ZIP has a corrupt entry: {bad}')\n            forbidden = [name for name in archive.namelist() if Path(name).suffix.lower() in {'.jks', '.keystore', '.p12', '.pfx'}]\n            if forbidden:\n                fail('Sanitized source ZIP contains signing material')\n    except zipfile.BadZipFile:\n        fail('Sanitized source ZIP is invalid')\n"""
+          if old not in text:
+              raise SystemExit('Expected validation block not found')
+          validator.write_text(text.replace(old, new), encoding='utf-8')
+
+          manifest_path = root / 'manifests' / 'SNAPSHOT.json'
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          def omit(path):
+              return (path == 'apk/archive/FaceBatch-0.4.0-source-scrubbed.zip'
+                      or path.startswith('web/tests/fixtures/')
+                      or path.startswith('web/tests/screenshots/'))
+          manifest['files'] = [entry for entry in manifest['files'] if not omit(entry['path'])]
+          manifest['file_count'] = len(manifest['files'])
+          manifest['total_bytes'] = sum(entry['bytes'] for entry in manifest['files'])
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+
+          sums_path = root / 'SHA256SUMS'
+          kept = []
+          for line in sums_path.read_text(encoding='utf-8').splitlines():
+              if not line.strip():
+                  continue
+              rel = line.split('  ', 1)[1]
+              if (rel == 'apk/archive/FaceBatch-0.4.0-source-scrubbed.zip'
+                      or '__pycache__/' in rel
+                      or rel.startswith('web/tests/fixtures/')
+                      or rel.startswith('web/tests/screenshots/')):
+                  continue
+              kept.append(line)
+          sums_path.write_text('\n'.join(kept) + '\n', encoding='utf-8')
+
+          (root / 'apk' / 'archive' / 'README.md').write_text("""# Archived Android source\n\n`FaceBatch-0.4.0-source/` is the sanitized, reviewable copy of the available historical Android source preserved in this repository. The extracted tree is the canonical GitHub recovery artifact.\n\nSanitization changes:\n\n- removed local Android SDK paths and build outputs;\n- excluded every keystore and password;\n- changed `build-local.sh` to require external signing variables;\n- added a fingerprint-only signing note;\n- preserved production source and resources.\n\nThis source predates multi-face versions 0.5.0 through 0.7.0. It is included for recovery and regression reference, not as the current source tree.\n\nThe complete offline snapshot package created on August 29, 2026 also contains a redundant portable scrubbed ZIP of this tree. The GitHub repository keeps the extracted source directly so individual revisions remain inspectable and diffable.\n""", encoding='utf-8')
+          PY
+          git config user.name 'FaceBatch Snapshot Bot'
+          git config user.email 'jonathanjablon-stack@users.noreply.github.com'
+          git add scripts/validate_snapshot.py manifests/SNAPSHOT.json SHA256SUMS apk/archive/README.md
+          git commit -m 'Reconcile FaceBatch snapshot inventory'
+          git push origin HEAD:main
