@@ -15,7 +15,7 @@ Starts the gateway in mock mode on an available local port and checks:
 
 ## `browser_smoke.py`
 
-Starts a local static server and mock gateway, creates synthetic image fixtures, and exercises Chromium through Playwright:
+Starts a local static server and mock gateway, creates synthetic image fixtures at runtime, and exercises Chromium through Playwright:
 
 - gateway configuration and health;
 - two-donor by one-target single batch;
@@ -30,7 +30,7 @@ It contacts no external provider.
 
 ## Evidence
 
-`TEST_REPORT.md` records the complete executed validation. Screenshots and reusable synthetic fixtures are kept under `screenshots/` and `fixtures/`.
+`TEST_REPORT.md` is the canonical record of the completed validation. The original conversion workspace also retained screenshot and reusable fixture binaries. Those convenience artifacts are not required to run the tests and are not mirrored in the private GitHub snapshot. `browser_smoke.py` generates its synthetic image inputs at runtime.
 
 ## `custom-adapter-smoke.sh`
 
