@@ -25,8 +25,8 @@ jobs:
           ROOT="$(find /tmp/facebatch-restore -mindepth 1 -maxdepth 1 -type d | head -1)"
           test -n "$ROOT"
           cp -a "$ROOT"/. ./
+          git restore --source=HEAD -- .github/workflows
           rm -rf bootstrap
-          rm -f .github/workflows/restore-snapshot.yml
       - name: Commit restored snapshot
         shell: bash
         run: |
