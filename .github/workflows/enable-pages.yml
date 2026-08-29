@@ -1,0 +1,37 @@
+name: Enable FaceBatch Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/enable-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable Pages for workflow deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          code="$(curl -sS -o "$body" -w '%{http_code}' -L -X POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages" \
+            -d '{"build_type":"workflow"}')"
+          cat "$body"
+          echo "HTTP $code"
+          if [ "$code" = 201 ] || [ "$code" = 409 ]; then
+            exit 0
+          fi
+          exit 1
