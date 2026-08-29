@@ -1,0 +1,78 @@
+name: Enable and deploy FaceBatch Pages once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pages-enable-once/READY'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+environment:
+  name: github-pages
+
+jobs:
+  enable-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Enable or configure Pages
+        id: configure
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+          token: ${{ github.token }}
+
+      - name: Upload FaceBatch site
+        id: upload
+        if: steps.configure.outcome == 'success'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+          include-hidden-files: true
+
+      - name: Deploy FaceBatch site
+        id: deploy
+        if: steps.configure.outcome == 'success' && steps.upload.outcome == 'success'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Record result
+        if: always()
+        shell: bash
+        env:
+          CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p .pages-status
+          rm -f .pages-status/DEPLOYED .pages-status/ENABLEMENT_FAILED .pages-status/DEPLOY_FAILED
+          {
+            echo "configure=${CONFIGURE_OUTCOME}"
+            echo "upload=${UPLOAD_OUTCOME}"
+            echo "deploy=${DEPLOY_OUTCOME}"
+            echo "url=${PAGE_URL}"
+          } > .pages-status/result.txt
+          if [ "${DEPLOY_OUTCOME}" = "success" ]; then
+            touch .pages-status/DEPLOYED
+          elif [ "${CONFIGURE_OUTCOME}" != "success" ]; then
+            touch .pages-status/ENABLEMENT_FAILED
+          else
+            touch .pages-status/DEPLOY_FAILED
+          fi
+          rm -rf pages-enable-once
+          git config user.name 'FaceBatch Pages Bot'
+          git config user.email 'jonathanjablon-stack@users.noreply.github.com'
+          git add -A .pages-status pages-enable-once || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record FaceBatch Pages deployment result'
+            git push origin HEAD:main
+          fi
