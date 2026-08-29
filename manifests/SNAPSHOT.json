@@ -228,8 +228,8 @@
     },
     {
       "path": "apk/archive/README.md",
-      "bytes": 610,
-      "sha256": "dec983e9b837b2f7c4346c1d4fc10ac96fd3abb1514be16733a4d834287ea8ce"
+      "bytes": 883,
+      "sha256": "54db91a466b29c16012bfb7d3b232d26bddc5f141f1d13d6f38cedf34cad819e"
     },
     {
       "path": "apk/archive/SOURCE_HASHES.txt",
@@ -328,8 +328,8 @@
     },
     {
       "path": "scripts/validate_snapshot.py",
-      "bytes": 5102,
-      "sha256": "a92dd896eaafe49604fd418f96f3812b028a6d25e22925d9cabed9f2822fac62"
+      "bytes": 5555,
+      "sha256": "775e458e92caa650cf5e66ef41d65b7c6892f0eba91137c6224e1f9a052abb80"
     },
     {
       "path": "web/FEATURE_PARITY.md",
@@ -383,8 +383,8 @@
     },
     {
       "path": "web/tests/README.md",
-      "bytes": 1237,
-      "sha256": "b79f7d0dd730a58530d171e57b8903b714ff2544ea369be0bd367f0eef689140"
+      "bytes": 1441,
+      "sha256": "c56fb8aee52d52e53789226546b08ee19a3f8083e9dbacc8360b92d09e1e91a8"
     },
     {
       "path": "web/tests/TEST_REPORT.md",
@@ -413,5 +413,5 @@
     }
   ],
   "file_count": 81,
-  "total_bytes": 716932
+  "total_bytes": 717862
 }
